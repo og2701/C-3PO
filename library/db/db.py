@@ -1,5 +1,6 @@
 from os.path import isfile
 from sqlite3 import connect
+from apscheduler.triggers.cron import CronTrigger
 
 DB_PATH = "./data/db/database.db"
 BUILD_PATH = "./data/db/build.sql"
@@ -13,13 +14,17 @@ def with_commit(func):
 		commit()
 	return inner
 
-@with.commit
+@with_commit
 def build():
 	if isfile(BUILD_PATH):
 		scriptexec(BUILD_PATH)
 
 def commit():
+	print("[i] Committing...")
 	connection.commit()
+
+def autosave(schedule):
+	schedule.add_job(commit, CronTrigger(second=0))
 
 def close():
 	connection.close()
@@ -46,7 +51,7 @@ def column(command, *values):
 	return [i[0] for i in cursor.fetchall()]
 
 def execute(command, *values):
-	cursor.execute(command, tuplev(values))
+	cursor.execute(command, tuple(values))
 
 def multiexec(command, valueset):
 	cursor.executemany(command, valueset)

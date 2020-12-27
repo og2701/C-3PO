@@ -2,3 +2,4 @@
 *.db-journal
 __pycache__
 library/bot/token.0
+library/resources/dbltoken.0
