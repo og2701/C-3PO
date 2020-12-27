@@ -4,4 +4,4 @@ dblpy
 lxml
 requests
 bs4
-pillow
+pillow==8.0.1
