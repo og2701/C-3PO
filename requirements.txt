@@ -1,6 +1,6 @@
+dblpy==0.4.0
 discord.py==1.5.1
 apscheduler==3.6.3
-dblpy
 lxml
 requests
 bs4
