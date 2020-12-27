@@ -1,4 +1,4 @@
-discord.py
+discord.py==1.5.1
 apscheduler==3.6.3
 dblpy
 lxml
