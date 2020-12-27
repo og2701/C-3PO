@@ -1,0 +1,8 @@
+**Star Wars related:**
+`archive <search term>` - Search the archive for anything Star Wars related
+`quote` - Retrieves a random quote from the films (this command does NOT take a parameter)
+`duel <mention someone>` - Duel with another person...
+**Misc:**
+`changeprefix <new prefix>` - Change the prefix that your server uses to communicate with C-3PO
+`invite` - Get the bot auth link to add it to your server
+`vote` - Vote for the bot

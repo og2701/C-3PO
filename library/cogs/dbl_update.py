@@ -1,7 +1,7 @@
 from discord.ext import commands, tasks
 from discord.ext.commands import Cog
-import dbl
 
+import dbl
 
 class TopGG(Cog):
     def __init__(self, bot):
@@ -18,11 +18,13 @@ class TopGG(Cog):
     async def update_stats(self):
         await self.bot.wait_until_ready()
         try:
-            #server_count = len(self.bot.guilds)
-            #await self.dblpy.post_guild_count(server_count)
-            #print("[i] Posted server count ({})".format(server_count))
-            #for i in await self.dblpy.get_bot_upvotes():
-            #    voters.append(i["id"])
+            server_count = len(self.bot.guilds)
+            await self.dblpy.post_guild_count(server_count)
+            print("[i] Posted server count ({})".format(server_count))
+            with open("./library/resources/voters.txt",'w',encoding="utf-8") as f:
+                for i in await self.dblpy.get_bot_upvotes():
+                    f.write(i["id"])
+                    f.write('\n')
             print("[i] Updated voter list")
 
         except Exception as e:

@@ -1,5 +1,5 @@
 from discord import Intents, Embed, File
-from discord.ext.commands import Bot, CommandNotFound, Context, when_mentioned_or, command, has_permissions
+from discord.ext.commands import Bot, CommandNotFound, Context, when_mentioned_or, command, has_permissions, AutoShardedBot
 from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -13,7 +13,7 @@ COGS = [path.split("/")[-1][:-3] for path in glob("./library/cogs/*.py")]
 def get_prefix(bot, message):
 	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
 	if prefix == None:
-		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%')
+		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%!')
 		return get_prefix(bot, message) 
 	return when_mentioned_or(prefix)(bot, message)
 
@@ -29,7 +29,7 @@ class Ready(object):
 	def all_ready(self):
 		return all([getattr(self, cog) for cog in COGS])
 
-class Bot(Bot):
+class Bot(AutoShardedBot):
 	def __init__(self):
 		self.ready = False
 		self.guild = None
@@ -40,8 +40,7 @@ class Bot(Bot):
 
 		super().__init__(
 			command_prefix=get_prefix,
-			owner_ids=OWNER_IDS,
-			intents=Intents.all())
+			owner_ids=OWNER_IDS )
 
 	def setup(self):
 		for cog in COGS:
