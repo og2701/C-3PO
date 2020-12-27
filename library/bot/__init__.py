@@ -1,5 +1,6 @@
 from discord import Intents, Embed, File
 from discord.ext.commands import Bot, CommandNotFound, Context, when_mentioned_or, command, has_permissions, AutoShardedBot
+
 from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -7,8 +8,12 @@ from ..db import db
 from glob import glob
 from asyncio import sleep
 
-OWNER_IDS = [404634271861571584]
+OWNER_IDS = list()
 COGS = [path.split("/")[-1][:-3] for path in glob("./library/cogs/*.py")]
+
+with open("./library/resources/helpers.txt",'r',encoding="utf-8") as f:
+	for i in f.readlines():
+		OWNER_IDS.append(i)
 
 def get_prefix(bot, message):
 	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)

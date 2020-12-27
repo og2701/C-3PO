@@ -6,7 +6,9 @@ library/bot/token.0
 library/resources/dbltoken.0
 
 library/resources/voters.txt
+library/resources/helpers.txt
 
 library/resources/p1.png
 library/resources/p2.png
 library/resources/duel.png
+
