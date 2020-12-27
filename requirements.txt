@@ -3,5 +3,5 @@ apscheduler
 dblpy
 lxml
 requests
-bs4
+bs4==0.0.1
 pillow
