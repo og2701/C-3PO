@@ -1,7 +1,7 @@
+lxml==4.6.2
 dblpy==0.4.0
 discord.py==1.5.1
 apscheduler==3.6.3
-lxml
 requests
 bs4
 pillow
