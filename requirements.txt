@@ -1,0 +1,7 @@
+discord.py
+apscheduler
+dblpy
+lxml
+requests
+bs4
+pillow
