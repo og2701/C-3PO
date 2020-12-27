@@ -1,7 +1,7 @@
 discord.py
 apscheduler
 dblpy
-lxml
+lxml==4.6.2
 requests
 bs4
 pillow
