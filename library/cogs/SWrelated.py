@@ -9,7 +9,7 @@ from lxml.etree import HTMLParser, parse
 from requests import get
 from bs4 import BeautifulSoup
 from re import sub
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFont
 
 quotes = []
 category_exc = [

@@ -1,15 +1,20 @@
 from discord import Intents, Embed, File
-from discord.ext.commands import Bot, CommandNotFound, Context, when_mentioned_or, command, has_permissions, AutoShardedBot
+from discord.errors import HTTPException, Forbidden
+from discord.ext.commands import (Bot, CommandNotFound, Context, when_mentioned_or,
+								 command, has_permissions, AutoShardedBot, CommandNotFound,
+								 CommandOnCooldown, BadArgument, MissingRequiredArgument)
+
+from ..db import db
 
 from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from ..db import db
 from glob import glob
 from asyncio import sleep
 
 OWNER_IDS = list()
 COGS = [path.split("/")[-1][:-3] for path in glob("./library/cogs/*.py")]
+IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 
 with open("./library/resources/helpers.txt",'r',encoding="utf-8") as f:
 	for i in f.readlines():
@@ -82,8 +87,22 @@ class Bot(AutoShardedBot):
 		raise
 
 	async def on_command_error(self, ctx, exc):
-		if isinstance(exc, CommandNotFound):
+		if any([isinstance(exc, error) for error in IGNORE_EXCEPTIONS]):
 			pass
+
+		elif isinstance(exc, MissingRequiredArgument):
+			await ctx.send("One or more required arguments are missing.")
+
+		elif isinstance(exc, CommandOnCooldown):
+			await ctx.send(f"That command is on cooldown. Try again in {exc.retry_after:,.2f} secs.")
+		elif hasattr(exc, "original"):
+
+			if isinstance(exc.original, Forbidden):
+				await ctx.send("I do not have permission to do that.")
+
+			else:
+				raise exc.original
+
 		else:
 			raise exc
 
