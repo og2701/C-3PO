@@ -23,7 +23,7 @@ with open("./library/resources/helpers.txt",'r',encoding="utf-8") as f:
 def get_prefix(bot, message):
 	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
 	if prefix == None:
-		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%!')
+		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%')
 		return get_prefix(bot, message) 
 	return when_mentioned_or(prefix)(bot, message)
 
@@ -94,7 +94,7 @@ class Bot(AutoShardedBot):
 			await ctx.send("One or more required arguments are missing.")
 
 		elif isinstance(exc, CommandOnCooldown):
-			await ctx.send(f"That command is on cooldown. Try again in {exc.retry_after:,.2f} secs.")
+			await ctx.send(f"That command is on cooldown. Try again in {exc.retry_after//60:,.0f} minutes.")
 		elif hasattr(exc, "original"):
 
 			if isinstance(exc.original, Forbidden):

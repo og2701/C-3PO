@@ -1,22 +1,22 @@
 from discord.ext.commands import Cog, CheckFailure, command, cooldown, BucketType
-from discord import File, Member
+from discord import File, Member, Embed
 
 from ..db import db
 
 from datetime import datetime
-from random import randint
+from random import randint, choice
 from PIL import Image, ImageDraw, ImageFont
 from requests import get
 from typing import Optional
 
 RANKS = [1,1,1,5,5,10,15,20,30,20,25,40,50,50,50,100,100,200]
-CUM_RANKS = [sum(RANKS[:i]) for i in range(1, len(RANKS)+1)]
+CUMU_RANKS = [sum(RANKS[:i]) for i in range(1, len(RANKS)+1)]
 class Exp(Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
 
-	@command(name="showexp")
+	@command(name="rank")
 	async def showexp(self, ctx, target: Optional[Member]):
 		target = target or ctx.author
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", target.id)
@@ -24,11 +24,11 @@ class Exp(Cog):
 			lb = db.column("SELECT UserID FROM exp ORDER BY XP DESC")
 			rank = lb.index(target.id)+1
 
-			for i in range(len(CUM_RANKS)):
-				if rank <= CUM_RANKS[i]:
-					pos = len(CUM_RANKS)+1-i
+			for i in range(len(CUMU_RANKS)):
+				if rank <= CUMU_RANKS[i]:
+					pos = len(CUMU_RANKS)+1-i
 					break
-				elif rank > CUM_RANKS[-1]:
+				elif rank > CUMU_RANKS[-1]:
 					pos = 1
 					break
 
@@ -53,7 +53,7 @@ class Exp(Cog):
 			await ctx.send("That user doesn't have any galactic points! Use `roll` to gain your first.")
 
 	@command(name="roll")
-	@cooldown(1, 10, BucketType.user)
+	@cooldown(1, 1800, BucketType.user)
 	async def roll(self, ctx):
 		xp_add = randint(20,50)
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
@@ -63,6 +63,28 @@ class Exp(Cog):
 		else:
 			db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp+xp_add, ctx.author.id)
 			await ctx.send(f"You gained `{xp_add}` galactic points, bringing your total to `{xp+xp_add}`!")
+
+	@command(name="rebelscum",aliases=["rebel scum"])
+	@cooldown(1,1800, BucketType.user)
+	async def rebelscum(self,ctx):
+		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
+		if xp == None:
+			await ctx.send("You don't have any galactic points! Use `roll` to gain your first.")
+		else:
+			points = [randint(20,70),randint(20,70),-randint(1,25)]
+			res = choice(points)
+
+			Mbed = Embed()
+
+			if res < 0:
+				Mbed.colour = 0xFF0000
+				Mbed.add_field(name="Failure.",value=f"You fired at the rebel scum, but missed. You lost `{-res}` galactic points. The Empire expects you to do better next time.")
+			elif res > 0:
+				Mbed.colour = 0x00FF00
+				Mbed.add_field(name="Success!",value=f"You fired at the rebel scum with insane accuracy! You earned `{res}` galactic points! The Empire is pleased with you.")
+			await ctx.send(embed=Mbed)
+			db.field("UPDATE exp SET XP = ? WHERE UserID = ?",xp+res,ctx.author.id)
+
 
 
 	@Cog.listener()

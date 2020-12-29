@@ -1,8 +1,12 @@
 **Star Wars related:**
-`archive <search term>` - Search the archive for anything Star Wars related
-`quote` - Retrieves a random quote from the films (this command does NOT take a parameter)
+`archive <search term>` - Search the archive for anything Star Wars related.
+`quote` - Retrieves a random quote from the films (this command does NOT take a parameter).
 `duel <mention someone>` - Duel with another person...
+**Rank system:**
+`rank [mention someone]` - Displays yours or someone elses rank in the global leaderboard (leave blank for your own).
+`roll` - Roll for a random amount of points (between 20 and 50).
+`rebelscum` - Fire at the rebel scum to earn points for your empire! There is a chance to lose a small amount of points.
 **Misc:**
-`changeprefix <new prefix>` - Change the prefix that your server uses to communicate with C-3PO
-`invite` - Get the bot auth link to add it to your server
+`changeprefix <new prefix>` - Change the prefix that your server uses to communicate with C-3PO (you must have manage_server permissions).
+`invite` - Get the bot auth link to add it to your server.
 `vote` - Vote for the bot

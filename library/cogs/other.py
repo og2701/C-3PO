@@ -30,7 +30,7 @@ class other(Cog):
 
 		await ctx.send(embed=Mbed)
 
-	@command(name="prefix")
+	@command(name="changeprefix", aliases=["prefix"])
 	@has_permissions(manage_guild=True)
 	async def change_prefix(self, ctx, new: str):
 		if len(new) > 10:
