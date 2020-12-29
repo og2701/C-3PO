@@ -52,6 +52,16 @@ class Exp(Cog):
 		else:
 			await ctx.send("That user doesn't have any galactic points! Use `roll` to gain your first.")
 
+	@command(name="leaderboard", aliases=["lb"])
+	async def leaderboard(self, ctx):
+		lb = db.field("SELECT * FROM exp ORDER BY XP DESC")
+		lb = list(lb)
+		Mbed = Embed(colour=0x7289DA)
+
+		for i in range(10):
+			Mbed.add_field(name=f"{i+1} - {self.ctx.bot.guild.get_member(lb[i][0])}",value=f"Galactic points: {lb[i][1]}")
+
+
 	@command(name="roll")
 	@cooldown(1, 1800, BucketType.user)
 	async def roll(self, ctx):
