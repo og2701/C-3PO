@@ -43,7 +43,7 @@ def record(command, *values):
 def records(command, *values):
 	cursor.execute(command, tuple(values))
 
-	cursor.fetchall()
+	return cursor.fetchall()
 
 def column(command, *values):
 	cursor.execute(command, tuple(values))
