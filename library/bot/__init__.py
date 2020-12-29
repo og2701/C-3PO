@@ -45,6 +45,7 @@ class Bot(AutoShardedBot):
 		self.guild = None
 		self.cogs_ready = Ready()
 		self.scheduler = AsyncIOScheduler()
+		self.stdout = self.get_channel(464133106497224708)
 
 		db.autosave(self.scheduler)
 
@@ -74,6 +75,7 @@ class Bot(AutoShardedBot):
 		if ctx.command is not None and ctx.guild is not None:
 			if self.ready:
 				await self.invoke(ctx)
+				await self.stdout.send(f"{ctx.author.name} used {message} in {ctx.guild.name}")
 
 	async def on_connect(self):
 		print("[i] Connected")

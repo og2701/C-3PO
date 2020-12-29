@@ -54,13 +54,20 @@ class Exp(Cog):
 
 	@command(name="leaderboard", aliases=["lb"])
 	async def leaderboard(self, ctx):
-		lb = db.field("SELECT * FROM exp ORDER BY XP DESC")
+		lb_res = db.column("SELECT * FROM exp ORDER BY XP DESC")
 		lb = list(lb)
+
 		Mbed = Embed(colour=0x7289DA)
 
+		top10 = ""
 		for i in range(10):
-			Mbed.add_field(name=f"{i+1} - {self.ctx.bot.guild.get_member(lb[i][0])}",value=f"Galactic points: {lb[i][1]}")
+			top10+=f"{i+1} - {self.ctx.bot.guild.get_member(lb[i][0])}, Points: {lb[i][1]}\n"
+		
+		Mbed.add_field(name=f"Top 10",value=top10)
+		Mbed.add_field(name="Your rank",value=f"{lb_res.index(ctx.author.id)+1}")
+		Mbed.set_thumbnail(url=self.bot.user.avatar_url)
 
+		await ctx.send(embed=Mbed)
 
 	@command(name="roll")
 	@cooldown(1, 1800, BucketType.user)
