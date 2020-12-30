@@ -70,7 +70,7 @@ class Exp(Cog):
 ##		await ctx.send(embed=Mbed)
 
 	@command(name="roll")
-	@cooldown(1, 1800, BucketType.user)
+	@cooldown(1, 600, BucketType.user)
 	async def roll(self, ctx):
 		xp_add = randint(20,50)
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)

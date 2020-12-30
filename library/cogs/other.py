@@ -26,7 +26,8 @@ class other(Cog):
 		Mbed = Embed(colour=0x7289DA)
 		Mbed.set_author(name=f"Current prefix: {get_prefix(ctx)}")
 		Mbed.set_thumbnail(url=self.bot.user.avatar_url)
-		Mbed.add_field(name="__Commands__",value='\n'.join(help_text))
+		Mbed.add_field(name="__Commands__",value=''.join(help_text))
+		Mbed.set_footer(text="[optional] <required>")
 
 		await ctx.send(embed=Mbed)
 
