@@ -94,7 +94,7 @@ class Hand:
     def add_card(self,card):
         self.cards.append(card)
         self.value += values[card.rank]
-        if card.rank == 'A':
+        if card.rank == 'Ace':
             self.aces += 1
 
     def adjust_for_ace(self):
@@ -144,7 +144,7 @@ class sabacc(Cog):
 			while True:
 	
 				def check(m):
-					return (m.content.lower() == 'hit' or m.content.lower() == 'stand') and m.channel == ctx.channel
+					return (m.content.lower() == 'hit' or m.content.lower() == 'stand') and m.channel == ctx.channel and m.author == ctx.author
 
 				resp = await self.bot.wait_for('message',check=check)
 
