@@ -2,6 +2,7 @@
 `archive <search term>` - Search the archive for anything Star Wars related.
 `quote` - Retrieves a random quote from the films (this command does NOT take a parameter).
 `duel <mention someone>` - Duel with another person...
+`meme` - Get a random meme from hot in r/prequelmemes
 
 **Rank system:**
 `rank [mention someone]` - Displays yours or someone elses rank in the global leaderboard (leave blank for your own).

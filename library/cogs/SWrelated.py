@@ -10,30 +10,20 @@ from requests import get
 from bs4 import BeautifulSoup
 from re import sub
 from PIL import Image, ImageDraw, ImageFont
+from praw import Reddit
 
 quotes = []
-category_exc = [
-			   	[
+with open("./library/resources/reddit_secret.0",'r') as f:
+	reddit = Reddit(client_id="Ff908EpHV9mgag",
+				 client_secret=f.read(),
+				 user_agent='C-3PO Discord Bot')
 
-				   	['birth','death','species','gender','height','mass','hair',
-					'eyes','skin','type','creators','value','shape','size',
-					'region','sector','system','terrain','manufacturer','model',
-					'length','class','cost','crew','passengers','designation'],
-
-					['colour','terrain','Average','Organization','Native','Position type']
-
-				],
-
-			   	['masters','apprentices','owners','ledby','headquarters',
-			   	 'locations','leader','commander']
-			   ]
-
-with open("./library/resources/quotes.txt",'r',encoding="utf-8") as f:
+with open("./library/resources/quotes.txt",'r') as f:
 	for quote in f.readlines():
 		quotes.append(quote)
 
 def isvoter(query):
-	with open("./library/resources/voters.txt",'r',encoding="utf-8") as f:
+	with open("./library/resources/voters.txt",'r') as f:
 		if str(query)+'\n' in f.readlines():
 			return True
 		else:
@@ -82,45 +72,26 @@ class SWrelated(Cog):
 			    if ele.get('property') == 'og:image':
 			        Mbed.set_image(url=ele.get('content'))
 			        
-			    if ele.get('name') == 'description':
-			        Mbed.add_field(name='Description',value=ele.get('content'))
+			    if ele.get('property') == 'og:description':
+			        Mbed.add_field(name='Description',value=ele.get('content').replace(
+			        	"Please update the article to reflect recent events, and remove this template when finished. ", '')+"...",inline=False)
 
 			    if ele.get('property') == 'og:title':
 			        Mbed.set_author(name=ele.get('content'),url=search_res)
 
 			info = list()
 			for ele in soup.find_all('div'):
-			            if ele.get('data-source') in category_exc[0]:
-			                res = ele.get_text().replace('\n',' ').replace('color','colour')
-			                res = sub("[\[].*?[\]]", "", res)
-			                double = False
-			                for i in category_exc[0][0]:
-			                    if i in res:
-			                        double = True
-			                        break
-			                if double:
-			                    info.append(res
-			                        .replace(' ','**',1)
-			                        .replace(' ',':** ',2)
-			                        .replace(':** ',' ',1)
-			                        )
-			                    
-			                else:
-			                    info.append(res
-			                          .replace(' ','**',1)
-			                          .replace(' ',':** ',1)
-			                          )
+				if ele.get('data-source') != None:
+					info.append(sub(
 
-			                
-			            if ele.get('data-source') in category_exc[1]:
-			                res = ele.get_text().replace('\n',' ')
-			                res = sub("[\[].*?[\]]", ", ", res)
-			                res = res.replace(' ','**',1).replace(' ',':** ',1)
-			                res = res.split(',')[:-1]
-			                info.append(', '.join(res))
+									"[\[].*?[\]]", ", ",ele.get_text().replace("color","colour").replace('\n',': **')
 
+									)[2:-6])
+			while sum([len(i) for i in info])>1024:
+				info = info[:-1]
 			if info != []:
-				Mbed.add_field(name='Information',value='\n'.join(info))
+				Mbed.add_field(name='Information',value='\n'.join(info),inline=False)
+
 			await ctx.send(embed=Mbed)
 			await searching.delete()
 
@@ -160,6 +131,15 @@ class SWrelated(Cog):
 		image.save("./library/resources/duel.png")
 
 		await ctx.send(file=File(fp="./library/resources/duel.png",filename="duel.png"))
+
+	@command(name="meme")
+	async def meme(self,ctx):
+		subred = reddit.subreddit('prequelmemes').hot()
+		posts = randint(1, 50)
+		for i in range(0, posts):
+		    submission = next(i for i in subred if not i.stickied)
+
+		await ctx.send(submission.url)
 
 	@Cog.listener()
 	async def on_ready(self):

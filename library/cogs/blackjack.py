@@ -94,7 +94,7 @@ class Hand:
     def add_card(self,card):
         self.cards.append(card)
         self.value += values[card.rank]
-        if card.rank == 'A':
+        if card.rank == 'Ace':
             self.aces += 1
 
     def adjust_for_ace(self):
@@ -144,7 +144,7 @@ class sabacc(Cog):
 			while True:
 	
 				def check(m):
-					return (m.content.lower() == 'hit' or m.content.lower() == 'stand') and m.channel == ctx.channel
+					return (m.content.lower() == 'hit' or m.content.lower() == 'stand') and m.channel == ctx.channel and m.author == ctx.author
 
 				resp = await self.bot.wait_for('message',check=check)
 
@@ -191,6 +191,10 @@ class sabacc(Cog):
 			if loss == True:
 				db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp-bet, ctx.author.id)
 				await ctx.send(f"You lost `{bet}` galactic points, bringing your total to `{xp-bet}`!")
+				with open("./library/resources/total_lost.0",'r') as f:
+					total_lost = int(f.read())
+				with open("./library/resources/total_lost.0",'w') as f:
+					f.write(str(total_lost+bet))
 			elif loss == 'Tie':
 				await ctx.send("Tie! Your points were returned to you.")
 			else:
