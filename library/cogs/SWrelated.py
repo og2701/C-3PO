@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from re import sub
 from PIL import Image, ImageDraw, ImageFont
 from praw import Reddit
+from os import remove as delete_file
 
 quotes = []
 with open("./library/resources/reddit_secret.0",'r') as f:
@@ -46,9 +47,7 @@ class SWrelated(Cog):
 
 	@command(name="archive", aliases=["wiki"])
 	async def archive(self,ctx, *query: str):
-		print(1)
 		query = ' '.join(list(query))
-		print(query)
 		searching = await ctx.send('Searching the archive...')
 		if isvoter(ctx.author.id):
 			colour = 0xE5B233
@@ -74,7 +73,7 @@ class SWrelated(Cog):
 			        
 			    if ele.get('property') == 'og:description':
 			        Mbed.add_field(name='Description',value=ele.get('content').replace(
-			        	"Please update the article to reflect recent events, and remove this template when finished. ", '')+"...",inline=False)
+			        	"Please update the article to reflect recent events, and remove this template when finished. ", '')+"...",inline=True)
 
 			    if ele.get('property') == 'og:title':
 			        Mbed.set_author(name=ele.get('content'),url=search_res)
@@ -90,7 +89,7 @@ class SWrelated(Cog):
 			while sum([len(i) for i in info])>1024:
 				info = info[:-1]
 			if info != []:
-				Mbed.add_field(name='Information',value='\n'.join(info),inline=False)
+				Mbed.add_field(name='Information',value='\n'.join(info),inline=True)
 
 			await ctx.send(embed=Mbed)
 			await searching.delete()
@@ -140,6 +139,27 @@ class SWrelated(Cog):
 		    submission = next(i for i in subred if not i.stickied)
 
 		await ctx.send(submission.url)
+
+	@command(name="translate")
+	async def translate(self,ctx,*message: str):
+		text = list()
+		for i in range(0, len(message), 4):
+			text.append(' '.join(message[i:i+4]))
+		translated = '\n'.join(text)
+
+		font = ImageFont.truetype("./library/resources/Aurebesh.ttf", size=30)
+		width = font.getsize(max(text,key=len))[0] + 15
+		height = 23*(len(text)+1) + 30
+
+		img = Image.new("RGBA", (width, height), (255,255,255,0))
+		draw = ImageDraw.Draw(img)
+		draw.text((0,0), translated, (0,0,0), font)
+		img.save(f"./library/resources/translations/{ctx.author.id}.png")
+
+		await ctx.send(file=File(fp=f"./library/resources/translations/{ctx.author.id}.png",filename="translation.png"))
+
+		delete_file(f"./library/resources/translations/{ctx.author.id}.png")
+
 
 	@Cog.listener()
 	async def on_ready(self):

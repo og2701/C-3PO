@@ -19,3 +19,5 @@ library/resources/total_lost.0
 library/resources/reddit_secret.0
 
 library/cogs/dev.py
+
+library/resources/translations
