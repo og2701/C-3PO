@@ -7,6 +7,19 @@ INVITE_URL = "https://discordapp.com/oauth2/authorize?client_id=4951220477147217
 SUPPORT_SRVR = "https://discord.gg/vV24DgR"
 VOTE_URL = "https://top.gg/bot/495122047714721793/vote"
 
+help1 = list()
+help2 = list()
+help3 = list()
+with open("./library/resources/help/swrelated.txt",'r', encoding="utf-8") as f:
+	for i in f.readlines():
+		help1.append(i)
+with open("./library/resources/help/rank.txt",'r', encoding="utf-8") as f:
+	for i in f.readlines():
+		help2.append(i)
+with open("./library/resources/help/misc.txt",'r', encoding="utf-8") as f:
+	for i in f.readlines():
+		help3.append(i)
+
 def get_prefix(message):
 	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
 	return prefix
@@ -18,15 +31,12 @@ class other(Cog):
 
 	@command(name="help")
 	async def help_cmd(self,ctx):
-		help_text = list()
-		with open("./library/resources/help.txt",'r', encoding="utf-8") as f:
-			for i in f.readlines():
-				help_text.append(i)
-
 		Mbed = Embed(colour=0x7289DA)
 		Mbed.set_author(name=f"Current prefix: {get_prefix(ctx)}")
 		Mbed.set_thumbnail(url=self.bot.user.avatar_url)
-		Mbed.add_field(name="__Commands__",value=''.join(help_text))
+		Mbed.add_field(name="__Star Wars Related__",value=''.join(help1),inline=False)
+		Mbed.add_field(name="__Rank system__",value=''.join(help2),inline=False)
+		Mbed.add_field(name="__Other__",value=''.join(help3),inline=False)
 		Mbed.set_footer(text="[optional] <required>")
 
 		await ctx.send(embed=Mbed)
