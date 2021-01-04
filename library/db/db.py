@@ -45,6 +45,11 @@ def records(command, *values):
 
 	return cursor.fetchall()
 
+def cmd(command):
+	cursor.execute(command)
+
+	return cursor.fetchall()
+
 def column(command, *values):
 	cursor.execute(command, tuple(values))
 
