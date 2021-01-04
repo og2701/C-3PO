@@ -147,11 +147,11 @@ class SWrelated(Cog):
 			text.append(' '.join(message[i:i+4]))
 		translated = '\n'.join(text)
 
-		font = ImageFont.truetype("./library/resources/Aurebesh.ttf", size=30)
+		font = ImageFont.truetype("./library/resources/Aurebesh.otf", size=30)
 		width = font.getsize(max(text,key=len))[0]
 		height = 23*(len(text))+5
 
-		img = Image.new("RGBA", (width, height), (255,255,255,255))
+		img = Image.new("RGBA", (width, height), (255,255,255,0))
 		draw = ImageDraw.Draw(img)
 		draw.text((0,0), translated, (0,0,0), font)
 		img.save(f"./library/resources/translations/{ctx.author.id}.png")
