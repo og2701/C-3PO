@@ -3,7 +3,7 @@ from discord import Embed, File
 
 from ..db import db
 
-from random import shuffle
+from random import shuffle, randint
 
 suits = ("Sabers","Flasks","Coins","Staves")
 ranks = ('2','3','4','5','6','7','8','9','10','11','Commander','Mistress','Master','Ace')
@@ -166,7 +166,7 @@ class sabacc(Cog):
 					break
 			if player.value <= TARGET:
 				Mbed = Embed(colour=0x7289DA,title="Sabacc")
-				while dealer.value < 15:
+				while dealer.value < randint(14,17):
 					dealer.add_card(deck.deal())
 					dealer.adjust_for_ace()
 				show_all(Mbed,player,dealer)
