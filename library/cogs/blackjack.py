@@ -166,7 +166,7 @@ class sabacc(Cog):
 					break
 			if player.value <= TARGET:
 				Mbed = Embed(colour=0x7289DA,title="Sabacc")
-				while dealer.value < 13:
+				while dealer.value < 15:
 					dealer.add_card(deck.deal())
 					dealer.adjust_for_ace()
 				show_all(Mbed,player,dealer)
