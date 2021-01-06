@@ -11,16 +11,27 @@ from typing import Optional
 
 RANKS = [1,1,1,5,5,10,15,20,30,20,25,40,50,50,50,100,100,200]
 CUMU_RANKS = [sum(RANKS[:i]) for i in range(1, len(RANKS)+1)]
+
+
+def update_points(uid):
+	newpoints = db.field("SELECT XP FROM exp WHERE UserID = ?",uid)
+	points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",uid)
+	if points == None:
+		db.field("INSERT INTO achievements (UserID, a_points) VALUES (?, ?)",uid,newpoints)
+	elif newpoints > points:
+		db.field("UPDATE achievements SET a_points = ? WHERE UserID = ?",newpoints,uid)
+
+
 class Exp(Cog):
 	def __init__(self, bot):
 		self.bot = bot
-
 
 	@command(name="rank")
 	async def showexp(self, ctx, target: Optional[Member]):
 		target = target or ctx.author
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", target.id)
 		if xp != None:
+			update_points(ctx.author.id)
 			lb = db.column("SELECT UserID FROM exp ORDER BY XP DESC")
 			rank = lb.index(target.id)+1
 
@@ -36,10 +47,42 @@ class Exp(Cog):
 			with open("./library/resources/rankp.png","wb") as p:
 				p.write(pfp)
 
+			points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",ctx.author.id)
+			rscum = db.field("SELECT a_rebelscum FROM achievements WHERE UserID = ?",ctx.author.id)
+
+			if points >= 100000:
+				pImg = "p100000"
+			elif points >= 10000:
+				pImg = "p10000"
+			elif points >= 1000:
+				pImg = "p1000"
+			elif points >= 100:
+				pImg = "p100"
+			else:
+				pImg = "0"
+
+			if rscum == None:
+				rImg = "0"
+			else:
+				if rscum >= 1000:
+					rImg = "r1000"
+				elif rscum >= 250:
+					rImg = "r250"
+				elif rscum >= 50:
+					rImg = "r50"
+				elif rscum >= 10:
+					rImg = "r10"
+				else:
+					rImg = "0"
+
+			pImg = Image.open(f"./library/resources/achievements/{pImg}.png")
+			rImg = Image.open(f"./library/resources/achievements/{rImg}.png")
 			img = Image.open("./library/resources/rankp.png").resize((321,321))
 			card = Image.open(f"./library/resources/rank_cards/{pos}.png")
 
 			card.paste(img, (70,205))
+			card.paste(pImg, (840,544))
+			card.paste(rImg, (663,544))
 
 			draw = ImageDraw.Draw(card)
 			font = ImageFont.truetype("./library/resources/Neonmachine.ttf", size=50)
@@ -80,6 +123,7 @@ class Exp(Cog):
 		else:
 			db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp+xp_add, ctx.author.id)
 			await ctx.send(f"You gained `{xp_add}` galactic points, bringing your total to `{xp+xp_add}`!")
+		update_points(ctx.author.id)
 
 	@command(name="rebelscum",aliases=["rebel scum"])
 	@cooldown(1,1800, BucketType.user)
@@ -101,6 +145,13 @@ class Exp(Cog):
 				Mbed.add_field(name="Success!",value=f"You fired at the rebel scum with insane accuracy! You earned `{res}` galactic points! The Empire is pleased with you.")
 			await ctx.send(embed=Mbed)
 			db.field("UPDATE exp SET XP = ? WHERE UserID = ?",xp+res,ctx.author.id)
+			rscum = db.field("SELECT a_rebelscum FROM achievements WHERE UserID = ?", ctx.author.id)
+			if rscum == None:
+				db.field("INSERT INTO achievements (UserID, a_rebelscum) VALUES (?, ?)", ctx.author.id, 1)
+			else:
+				db.field("UPDATE achievements SET a_rebelscum = ? WHERE UserID = ?",rscum+1,ctx.author.id)
+			update_points(ctx.author.id)
+
 
 
 

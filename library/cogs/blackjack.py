@@ -15,6 +15,15 @@ values = {
 TARGET = 23
 
 
+def update_points(uid):
+	newpoints = db.field("SELECT XP FROM exp WHERE UserID = ?",uid)
+	points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",uid)
+	if points == None:
+		db.field("INSERT INTO achievements (UserID, a_points) VALUES (?, ?)",uid,newpoints)
+	elif newpoints > points:
+		db.field("UPDATE achievements SET a_points = ? WHERE UserID = ?",newpoints,uid)
+
+
 def hit(deck,hand):
     hand.add_card(deck.deal())
     hand.adjust_for_ace()
@@ -117,6 +126,7 @@ class sabacc(Cog):
 		elif bet < 1:
 			await ctx.send("You must bet at least 1 galactic point to play!")
 		else:
+			db.field("UPDATE exp SET XP = ? WHERE UserID = ?",xp-bet,ctx.author.id)
 			Mbed = Embed(colour=0x7289DA,title="Sabacc",description="Get as close to 23 as you can.\n`hit` or `stand`?")
 
 			loss = False
@@ -200,6 +210,7 @@ class sabacc(Cog):
 			else:
 				db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp+bet, ctx.author.id)
 				await ctx.send(f"You won `{bet}` galactic points, bringing your total to `{xp+bet}`!")
+			update_points(ctx.author.id)
 
 	@command(name="sabaccrules",aliases=["sabacrules","sabbacrules","sabbaccrules"])
 	async def sabbacrules(self,ctx):
