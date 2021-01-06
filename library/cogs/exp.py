@@ -31,7 +31,7 @@ class Exp(Cog):
 		target = target or ctx.author
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", target.id)
 		if xp != None:
-			update_points(ctx.author.id)
+			update_points(target.id)
 			lb = db.column("SELECT UserID FROM exp ORDER BY XP DESC")
 			rank = lb.index(target.id)+1
 
@@ -47,8 +47,8 @@ class Exp(Cog):
 			with open("./library/resources/rankp.png","wb") as p:
 				p.write(pfp)
 
-			points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",ctx.author.id)
-			rscum = db.field("SELECT a_rebelscum FROM achievements WHERE UserID = ?",ctx.author.id)
+			points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",target.id)
+			rscum = db.field("SELECT a_rebelscum FROM achievements WHERE UserID = ?",target.id)
 
 			if points >= 100000:
 				pImg = "p100000"
