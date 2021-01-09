@@ -21,3 +21,5 @@ library/resources/reddit_secret.0
 library/cogs/dev.py
 
 library/resources/translations
+
+data/rss_feed.txt
