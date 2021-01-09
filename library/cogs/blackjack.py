@@ -207,6 +207,7 @@ class sabacc(Cog):
 					f.write(str(total_lost+bet))
 			elif loss == 'Tie':
 				await ctx.send("Tie! Your points were returned to you.")
+				db.field("UPDATE exp SET XP = ? WHERE UserID = ?",xp,ctx.author.id)
 			else:
 				db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp+bet, ctx.author.id)
 				await ctx.send(f"You won `{bet}` galactic points, bringing your total to `{xp+bet}`!")

@@ -12,6 +12,7 @@ from re import sub
 from PIL import Image, ImageDraw, ImageFont
 from praw import Reddit
 from os import remove as delete_file
+from uuid import uuid4
 
 quotes = []
 with open("./library/resources/reddit_secret.0",'r') as f:
@@ -96,12 +97,16 @@ class SWrelated(Cog):
 
 	@command(name="duel", aliases=["fight"])
 	async def duel(self, ctx, member: Member):
+
 		pfp1 = get(str(ctx.author.avatar_url).replace('.webp?size=1024','.png')).content
 		pfp2= get(str(member.avatar_url).replace('.webp?size=1024','.png')).content
 
-		with open("./library/resources/p1.png","wb") as p:
+		p1_uuid = str(uuid4())
+		with open(f"./library/resources/{p1_uuid}.png","wb") as p:
 			p.write(pfp1)
-		with open("./library/resources/p2.png","wb") as p:
+
+		p2_uuid = str(uuid4())
+		with open(f"./library/resources/{p2_uuid}.png","wb") as p:
 			p.write(pfp2)
 
 		if isvoter(member.id) and isvoter(ctx.author.id):
@@ -123,13 +128,19 @@ class SWrelated(Cog):
 		elif choice == 1:
 			draw.text((1060,475,50), "Winner!", fill=colour, font=font)
 
-		image1 = Image.open("./library/resources/p1.png").resize((200,200))
-		image2 = Image.open("./library/resources/p2.png").resize((200,200))
+		image1 = Image.open(f"./library/resources/{p1_uuid}.png").resize((200,200))
+		image2 = Image.open(f"./library/resources/{p2_uuid}.png").resize((200,200))
 		image.paste(image1,(75,275))
 		image.paste(image2,(1060,275))
-		image.save("./library/resources/duel.png")
+
+		duel_uuid = str(uuid4())
+		image.save(f"./library/resources/{duel_uuid}.png")
 
 		await ctx.send(file=File(fp="./library/resources/duel.png",filename="duel.png"))
+
+		delete_file(f"./library/resources/rank{p1_uuid}.png")
+		delete_file(f"./library/resources/rank{p2_uuid}.png")
+		delete_file(f"./library/resources/rank{duel_uuid}.png")
 
 	@command(name="meme")
 	async def meme(self,ctx):

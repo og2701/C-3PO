@@ -8,6 +8,8 @@ from random import randint, choice
 from PIL import Image, ImageDraw, ImageFont
 from requests import get
 from typing import Optional
+from os import remove as delete_file
+from uuid import uuid4
 
 RANKS = [1,1,1,5,5,10,15,20,30,20,25,40,50,50,50,100,100,200]
 CUMU_RANKS = [sum(RANKS[:i]) for i in range(1, len(RANKS)+1)]
@@ -26,6 +28,7 @@ class Exp(Cog):
 	def __init__(self, bot):
 		self.bot = bot
 
+	@cooldown(1, 1.5, BucketType.user)
 	@command(name="rank")
 	async def showexp(self, ctx, target: Optional[Member]):
 		target = target or ctx.author
@@ -43,8 +46,9 @@ class Exp(Cog):
 					pos = 1
 					break
 
+			pfp_uuid = str(uuid4())
 			pfp = get(str(target.avatar_url).replace('.webp?size=1024','.png')).content
-			with open("./library/resources/rankp.png","wb") as p:
+			with open(f"./library/resources/{pfp_uuid}.png","wb") as p:
 				p.write(pfp)
 
 			points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",target.id)
@@ -88,10 +92,14 @@ class Exp(Cog):
 			font = ImageFont.truetype("./library/resources/Neonmachine.ttf", size=50)
 			colour = "rgb(0,0,0)"
 			draw.text((420,205), f"Name: {target.name}\n\nRank: {rank}\n\nGalactic Points: {xp}", fill=colour, font=font)
-
-			card.save("./library/resources/rank.png")
+			img_uuid = str(uuid4())
+			card.save(f"./library/resources/rank{img_uuid}.png")
 
 			await ctx.send(file=File(fp="./library/resources/rank.png",filename="rank.png"))
+
+			delete_file(f"./library/resources/rank{img_uuid}.png")
+			delete_file(f"./library/resources/rank{pfp_uuid}.png")
+
 		else:
 			await ctx.send("That user doesn't have any galactic points! Use `roll` to gain your first.")
 
@@ -161,3 +169,6 @@ class Exp(Cog):
 
 def setup(bot):
 	bot.add_cog(Exp(bot))
+
+
+	
