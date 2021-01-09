@@ -93,12 +93,12 @@ class Exp(Cog):
 			colour = "rgb(0,0,0)"
 			draw.text((420,205), f"Name: {target.name}\n\nRank: {rank}\n\nGalactic Points: {xp}", fill=colour, font=font)
 			img_uuid = str(uuid4())
-			card.save(f"./library/resources/rank{img_uuid}.png")
+			card.save(f"./library/resources/{img_uuid}.png")
 
-			await ctx.send(file=File(fp="./library/resources/rank.png",filename="rank.png"))
+			await ctx.send(file=File(fp=f"./library/resources/{img_uud}.png",filename="rank.png"))
 
-			delete_file(f"./library/resources/rank{img_uuid}.png")
-			delete_file(f"./library/resources/rank{pfp_uuid}.png")
+			delete_file(f"./library/resources/{img_uuid}.png")
+			delete_file(f"./library/resources/{pfp_uuid}.png")
 
 		else:
 			await ctx.send("That user doesn't have any galactic points! Use `roll` to gain your first.")
