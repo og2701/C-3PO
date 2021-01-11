@@ -81,7 +81,7 @@ class Exp(Cog):
 
 			pImg = Image.open(f"./library/resources/achievements/{pImg}.png")
 			rImg = Image.open(f"./library/resources/achievements/{rImg}.png")
-			img = Image.open("./library/resources/rankp.png").resize((321,321))
+			img = Image.open(f"./library/resources/{pfp_uuid}.png").resize((321,321))
 			card = Image.open(f"./library/resources/rank_cards/{pos}.png")
 
 			card.paste(img, (70,205))
