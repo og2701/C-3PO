@@ -136,11 +136,11 @@ class SWrelated(Cog):
 		duel_uuid = str(uuid4())
 		image.save(f"./library/resources/{duel_uuid}.png")
 
-		await ctx.send(file=File(fp="./library/resources/duel.png",filename="duel.png"))
+		await ctx.send(file=File(fp=f"./library/resources/{duel_uuid}.png",filename="duel.png"))
 
-		delete_file(f"./library/resources/rank{p1_uuid}.png")
-		delete_file(f"./library/resources/rank{p2_uuid}.png")
-		delete_file(f"./library/resources/rank{duel_uuid}.png")
+		delete_file(f"./library/resources/{p1_uuid}.png")
+		delete_file(f"./library/resources/{p2_uuid}.png")
+		delete_file(f"./library/resources/{duel_uuid}.png")
 
 	@command(name="meme")
 	async def meme(self,ctx):
