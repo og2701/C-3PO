@@ -95,7 +95,7 @@ class Exp(Cog):
 			img_uuid = str(uuid4())
 			card.save(f"./library/resources/{img_uuid}.png")
 
-			await ctx.send(file=File(fp=f"./library/resources/{img_uud}.png",filename="rank.png"))
+			await ctx.send(file=File(fp=f"./library/resources/{img_uuid}.png",filename="rank.png"))
 
 			delete_file(f"./library/resources/{img_uuid}.png")
 			delete_file(f"./library/resources/{pfp_uuid}.png")
