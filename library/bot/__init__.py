@@ -6,7 +6,7 @@ from discord.ext.commands import (Bot, CommandNotFound, Context, when_mentioned_
 
 from ..db import db
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from glob import glob
@@ -23,7 +23,7 @@ with open("./library/resources/helpers.txt",'r',encoding="utf-8") as f:
 def get_prefix(bot, message):
 	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
 	if prefix == None:
-		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%')
+		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%!')
 		return get_prefix(bot, message) 
 	return when_mentioned_or(prefix)(bot, message)
 
@@ -76,7 +76,10 @@ class Bot(AutoShardedBot):
 		if ctx.command is not None and ctx.guild is not None:
 			if self.ready:
 				await self.invoke(ctx)
-				await self.stdout.send(f"{ctx.author.name} ({ctx.author.id}) used {message.content} in {ctx.guild.name}")
+				with open("./data/log.log",'a') as f:
+					f.write(
+			f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} {ctx.author.name} ({ctx.author.id}) used {message.content} in {ctx.guild.name}\n"
+			               )
 
 	async def on_connect(self):
 		print("[i] Connected")
@@ -123,7 +126,9 @@ class Bot(AutoShardedBot):
 
 
 	async def on_message(self,message):
+
 		if not message.author.bot:
 			await self.process_commands(message)
 
 bot = Bot()
+

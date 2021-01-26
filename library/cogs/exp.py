@@ -31,6 +31,12 @@ class Exp(Cog):
 	@cooldown(1, 1.5, BucketType.user)
 	@command(name="rank")
 	async def showexp(self, ctx, target: Optional[Member]):
+		with open("./data/usage/rank.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
 		target = target or ctx.author
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", target.id)
 		if xp != None:
@@ -123,6 +129,12 @@ class Exp(Cog):
 	@command(name="roll")
 	@cooldown(1, 600, BucketType.user)
 	async def roll(self, ctx):
+		with open("./data/usage/roll.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
 		xp_add = randint(20,50)
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
 		if xp == None:
@@ -136,6 +148,12 @@ class Exp(Cog):
 	@command(name="rebelscum",aliases=["rebel scum"])
 	@cooldown(1,1800, BucketType.user)
 	async def rebelscum(self,ctx):
+		with open("./data/usage/rebelscum.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
 		if xp == None:
 			await ctx.send("You don't have any galactic points! Use `roll` to gain your first.")

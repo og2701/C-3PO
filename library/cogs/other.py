@@ -7,6 +7,7 @@ INVITE_URL = "https://discordapp.com/oauth2/authorize?client_id=4951220477147217
 SUPPORT_SRVR = "https://discord.gg/vV24DgR"
 VOTE_URL = "https://top.gg/bot/495122047714721793/vote"
 
+
 help1 = list()
 help2 = list()
 help3 = list()
@@ -31,6 +32,12 @@ class other(Cog):
 
 	@command(name="help")
 	async def help_cmd(self,ctx):
+		with open("./data/usage/help.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
 		Mbed = Embed(colour=0x7289DA)
 		Mbed.set_author(name=f"Current prefix: {get_prefix(ctx)}")
 		Mbed.set_thumbnail(url=self.bot.user.avatar_url)

@@ -15,6 +15,7 @@ values = {
 TARGET = 23
 
 
+
 def update_points(uid):
 	newpoints = db.field("SELECT XP FROM exp WHERE UserID = ?",uid)
 	points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",uid)
@@ -117,6 +118,11 @@ class sabacc(Cog):
 
 	@command(name="sabacc",aliases=["blackjack","sabbac","sabbacc","sabac"])
 	async def blackjack(self,ctx, bet: int):
+		with open("./data/usage/sabacc.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
 
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
 		if xp == None:

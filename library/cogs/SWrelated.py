@@ -37,6 +37,11 @@ class SWrelated(Cog):
 
 	@command(name="quote", aliases=["qt"])
 	async def quote(self,ctx):
+		with open("./data/usage/quote.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
 		qt = choice(quotes).split(' — ')
 		if isvoter(ctx.author.id):
 			colour = 0xE5B233
@@ -48,6 +53,12 @@ class SWrelated(Cog):
 
 	@command(name="archive", aliases=["wiki"])
 	async def archive(self,ctx, *query: str):
+		with open("./data/usage/archive.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
 		query = ' '.join(list(query))
 		searching = await ctx.send('Searching the archive...')
 		if isvoter(ctx.author.id):
@@ -97,6 +108,11 @@ class SWrelated(Cog):
 
 	@command(name="duel", aliases=["fight"])
 	async def duel(self, ctx, member: Member):
+		with open("./data/usage/duel.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
 
 		pfp1 = get(str(ctx.author.avatar_url).replace('.webp?size=1024','.png')).content
 		pfp2= get(str(member.avatar_url).replace('.webp?size=1024','.png')).content
@@ -144,6 +160,12 @@ class SWrelated(Cog):
 
 	@command(name="meme")
 	async def meme(self,ctx):
+		with open("./data/usage/meme.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
 		subred = reddit.subreddit('prequelmemes').hot()
 		posts = randint(1, 50)
 		for i in range(0, posts):
@@ -153,6 +175,12 @@ class SWrelated(Cog):
 
 	@command(name="translate")
 	async def translate(self,ctx,*message: str):
+		with open("./data/usage/translate.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
 		text = list()
 		for i in range(0, len(message), 4):
 			text.append(' '.join(message[i:i+4]))

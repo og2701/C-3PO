@@ -23,3 +23,6 @@ library/resources/translations
 
 data/rss_feed.txt
 
+data/log.log
+
+data/usage

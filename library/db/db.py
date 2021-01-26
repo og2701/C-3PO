@@ -20,7 +20,7 @@ def build():
 		scriptexec(BUILD_PATH)
 
 def commit():
-	print("[i] Committing...")
+	#print("[i] Committing...")
 	connection.commit()
 
 def autosave(schedule):
