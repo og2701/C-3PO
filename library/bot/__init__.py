@@ -23,7 +23,7 @@ with open("./library/resources/helpers.txt",'r',encoding="utf-8") as f:
 def get_prefix(bot, message):
 	prefix = db.field("SELECT Prefix FROM guilds WHERE GuildID = ?", message.guild.id)
 	if prefix == None:
-		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%!')
+		db.field("INSERT INTO guilds (GuildID, Prefix) VALUES (?, ?)", message.guild.id, '%')
 		return get_prefix(bot, message) 
 	return when_mentioned_or(prefix)(bot, message)
 
@@ -76,7 +76,7 @@ class Bot(AutoShardedBot):
 		if ctx.command is not None and ctx.guild is not None:
 			if self.ready:
 				await self.invoke(ctx)
-				with open("./data/log.log",'a') as f:
+				with open("./data/lasthour.log",'a') as f:
 					f.write(
 			f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')} {ctx.author.name} ({ctx.author.id}) used {message.content} in {ctx.guild.name}\n"
 			               )
