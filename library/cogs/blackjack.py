@@ -24,20 +24,25 @@ def update_points(uid):
 	elif newpoints > points:
 		db.field("UPDATE achievements SET a_points = ? WHERE UserID = ?",newpoints,uid)
 
+def hilo_new(player):
+    pcards = ""
+    for i in range(len(player.cards)):
+        pcards+=f"Card **{i+1}**: {player.cards[i]}\n\n"
+        card = values[str(player.cards[i]).split()[0]]
+    return pcards, card
+
 
 def hit(deck,hand):
     hand.add_card(deck.deal())
     hand.adjust_for_ace()
-
     
-
 def show_players(Mbed,player,dealer):
 	pcards = ""
 	for i in player.cards:
 		pcards+=str(i)+'\n'
 	Mbed.add_field(name="Players Hand",value=f"{pcards}\nValue: {player.value}")
 	Mbed.add_field(name="Dealers Hand",value=f"<card hidden>\n<card hidden>")
-    
+
 def show_all(Mbed,player,dealer):
 	pcards = ""
 	dcards = ""
@@ -222,6 +227,83 @@ class sabacc(Cog):
 	@command(name="sabaccrules",aliases=["sabacrules","sabbacrules","sabbaccrules"])
 	async def sabbacrules(self,ctx):
 		await ctx.send(file=File(fp="./library/resources/Sabacc_Rules.png",filename="rules.png"))	
+
+	@command(name="hilo", aliases=["HiLo","highlow","higherlower"])
+	async def hilo(self,ctx, bet: int):
+		with open("./data/usage/hilo.0",'r+') as f:
+			count = int(f.read())
+			f.seek(0)
+			f.truncate()
+			f.write(str(count+1))
+
+		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
+		if xp == None:
+			await ctx.send("You don't have any galactic points! Use `roll` to gain your first.")
+		elif int(xp) < bet:
+			await ctx.send("You don't have enough galactic points to make that bet!")
+		elif bet < 1:
+			await ctx.send("You must bet at least 1 galactic point to play!")
+		else:
+			db.field("UPDATE exp SET XP = ? WHERE UserID = ?",xp-bet,ctx.author.id)
+
+			Mbed = Embed(colour=0x7289DA,title="Higher or Lower",description="Guess whether the next card will be higher or lower!\n`Hi` or `Lo`")
+			hand = Hand()
+			deck = Deck()
+
+			hand.add_card(deck.deal())
+			cards, val = hilo_new(hand)
+			Mbed.add_field(name="Cards",value=cards+"Value: "+str(val))
+			msg = await ctx.send(embed=Mbed)
+			win = False
+			draw = False
+			for i in range(2):
+				def check(m):
+					return (m.content.lower() in ['higher','hi'] or m.content.lower() in ['lower','lo','low']
+						) and m.channel == ctx.channel and m.author == ctx.author
+
+				resp = await self.bot.wait_for('message',check=check)
+
+				prev_val = val
+				hand.add_card(deck.deal())
+				cards, val = hilo_new(hand)
+
+				if val == prev_val:
+				    draw = True
+				elif val > prev_val and resp.content.lower() in ['higher','hi']:
+				    win = True
+				    draw = False
+				elif val < prev_val and resp.content.lower() in ['lower','lo','low']:
+				    win = True
+				    draw = False
+				else:
+				    win = False
+				    draw = False
+				    break
+
+				Mbed = Embed(colour=0x7289DA,title="Higher or Lower",description="Guess whether the next card will be higher or lower!\n`Hi` or `Lo`")
+				Mbed.add_field(name="Cards",value=cards+"Value: "+str(val))
+
+				await msg.edit(embed=Mbed)
+
+			if draw == True:
+				Mbed = Embed(colour=0xFFA500,title="Higher or Lower",description="Tie!")
+				Mbed.add_field(name="Cards",value=cards)
+				db.field("UPDATE exp SET XP = ? WHERE UserID = ?",xp,ctx.author.id)
+				await ctx.send("Tie! Your points were returned to you.")
+
+			elif win == False:
+				Mbed = Embed(colour=0xFF0000,title="Higher or Lower",description="You lost!")
+				Mbed.add_field(name="Cards",value=cards)
+				db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp-bet, ctx.author.id)
+				await ctx.send(f"You lost `{bet}` galactic points, bringing your total to `{xp-bet}`!")
+
+			elif win == True:
+				Mbed = Embed(colour=0x00FF00,title="Higher or Lower",description="You lost!")
+				Mbed.add_field(name="Cards",value=cards)
+				db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp+bet, ctx.author.id)
+				await ctx.send(f"You won `{bet}` galactic points, bringing your total to `{xp+bet}`!")
+
+			await msg.edit(embed=Mbed)
 
 
 

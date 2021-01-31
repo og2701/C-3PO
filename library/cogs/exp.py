@@ -15,6 +15,13 @@ RANKS = [1,1,1,5,5,10,15,20,30,20,25,40,50,50,50,100,100,200]
 CUMU_RANKS = [sum(RANKS[:i]) for i in range(1, len(RANKS)+1)]
 
 
+def isvoter(query):
+	with open("./library/resources/voters.txt",'r') as f:
+		if str(query)+'\n' in f.readlines():
+			return True
+		else:
+			return False
+
 def update_points(uid):
 	newpoints = db.field("SELECT XP FROM exp WHERE UserID = ?",uid)
 	points = db.field("SELECT a_points FROM achievements WHERE UserID = ?",uid)
@@ -135,7 +142,10 @@ class Exp(Cog):
 			f.truncate()
 			f.write(str(count+1))
 
-		xp_add = randint(20,50)
+		if isvoter(ctx.author.id):
+			xp_add = randint(50,100)
+		else:
+			xp_add = randint(20,50)
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
 		if xp == None:
 			db.field("INSERT INTO exp (UserID, XP) VALUES (?, ?)", ctx.author.id, xp_add)
@@ -158,7 +168,7 @@ class Exp(Cog):
 		if xp == None:
 			await ctx.send("You don't have any galactic points! Use `roll` to gain your first.")
 		else:
-			points = [randint(20,70),randint(20,70),-randint(1,25)]
+			points = [randint(50,150),randint(50,150),-randint(1,50)]
 			res = choice(points)
 
 			Mbed = Embed()
