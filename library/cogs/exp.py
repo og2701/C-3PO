@@ -142,17 +142,25 @@ class Exp(Cog):
 			f.truncate()
 			f.write(str(count+1))
 
+		
+
 		if isvoter(ctx.author.id):
 			xp_add = randint(50,100)
+			footer = "Payout increased with voter boost"
 		else:
 			xp_add = randint(20,50)
+			footer = "Increase your payout by voting for the bot!"
+
 		xp = db.field("SELECT XP FROM exp WHERE UserID = ?", ctx.author.id)
 		if xp == None:
 			db.field("INSERT INTO exp (UserID, XP) VALUES (?, ?)", ctx.author.id, xp_add)
-			await ctx.send(f"You gained `{xp_add}` galactic points, bringing your total to `{xp_add}`!")
+			Mbed = Embed(colour=0x7289DA, description=f"You gained `{xp_add}` galactic points, bringing your total to `{xp_add}`!")
 		else:
 			db.field("UPDATE exp SET XP = ? WHERE UserId = ?", xp+xp_add, ctx.author.id)
-			await ctx.send(f"You gained `{xp_add}` galactic points, bringing your total to `{xp+xp_add}`!")
+			Mbed = Embed(colour=0x7289DA, description=f"You gained `{xp_add}` galactic points, bringing your total to `{xp+xp_add}`!")
+		Mbed.set_footer(text=footer)
+
+		await ctx.send(embed=Mbed)
 		update_points(ctx.author.id)
 
 	@command(name="rebelscum",aliases=["rebel scum"])
