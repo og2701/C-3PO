@@ -146,7 +146,7 @@ class Exp(Cog):
 
 		if isvoter(ctx.author.id):
 			xp_add = randint(50,100)
-			footer = "Payout increased with voter boost"
+			footer = "Payout increased with voter boost!"
 		else:
 			xp_add = randint(20,50)
 			footer = "Increase your payout by voting for the bot!"
