@@ -87,8 +87,8 @@ class DrawButton(discord.ui.Button):
 
         embed.add_field(name="Your Hand", value=game.format_p_hand(), inline=False)
         embed.add_field(name="Your Total", value=str(sum(game.player_hand)), inline=False)
-        embed.add_field(name="Bot's Hand", value="??", inline=False)
-        embed.add_field(name="Bot's Total", value="??", inline=False)
+        embed.add_field(name="C-3PO's Hand", value="??", inline=False)
+        embed.add_field(name="C-3PO's Total", value="??", inline=False)
 
         embed.set_footer(text=game.stats.format_stats())
 
@@ -120,8 +120,8 @@ class StandButton(discord.ui.Button):
 
         embed.add_field(name="Your Hand", value=game.format_p_hand(), inline=False)
         embed.add_field(name="Your Total", value=str(sum(game.player_hand)), inline=False)
-        embed.add_field(name="Bot's Hand", value=game.format_b_hand(), inline=False)
-        embed.add_field(name="Bot's Total", value=str(sum(game.bot_hand)), inline=False)
+        embed.add_field(name="C-3PO's Hand", value=game.format_b_hand(), inline=False)
+        embed.add_field(name="C-3PO's Total", value=str(sum(game.bot_hand)), inline=False)
 
         embed.set_footer(text=game.stats.format_stats())
 
@@ -152,5 +152,5 @@ class RulesButton(discord.ui.Button):
         embed.add_field(name="Goal", value="Get as close to 23 or -23 as possible without going over.")
         embed.add_field(name="Draw", value="Take another card from the deck.")
         embed.add_field(name="Stand", value="Stick with your current hand.")
-        embed.add_field(name="Winning", value="If your total is closer to 23 or -23 than the dealer's")
+        embed.add_field(name="Winning", value="If your total is closer to 23 or -23 than C-3PO's")
         await interaction.response.send_message(embed=embed)

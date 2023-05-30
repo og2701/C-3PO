@@ -24,8 +24,8 @@ async def sabacc(interaction: discord.Interaction):
 
     embed.add_field(name="Your Hand", value=game.format_p_hand(), inline=False)
     embed.add_field(name="Your Total", value=str(sum(game.player_hand)), inline=False)
-    embed.add_field(name="Bot's Hand", value="??", inline=False)
-    embed.add_field(name="Bot's Total", value="??", inline=False)
+    embed.add_field(name="C-3PO's Hand", value="??", inline=False)
+    embed.add_field(name="C-3PO's Total", value="??", inline=False)
 
     embed.set_thumbnail(url="https://i.imgur.com/3Fa2eXV.png")
     embed.set_footer(text=game.stats.format_stats())
