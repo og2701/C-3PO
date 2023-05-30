@@ -5,7 +5,7 @@ games = {}
 with open("tokens/token_test.0", 'r') as f:
     test_token = f.read()
 
-with open("tokens/token_test.0", 'r') as f:
+with open("tokens/token.0", 'r') as f:
     token = f.read()
 
 with open("tokens/reddit_secret.0",'r') as f:

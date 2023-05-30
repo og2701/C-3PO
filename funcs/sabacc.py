@@ -6,8 +6,8 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from settings import games
-from classes import SabaccGame, DrawButton, StandButton
+from lib.settings import games
+from lib.classes import SabaccGame, DrawButton, StandButton
 
 
 async def sabacc(interaction: discord.Interaction):
@@ -38,6 +38,11 @@ async def sabacc(interaction: discord.Interaction):
     view.add_item(stand_button)
 
     await interaction.response.send_message(embed=embed, view=view)
+
+    if game.game_over:
+        for item in view.children:
+            item.disabled = True
+        await interaction.response.edit_message(embed=embed, view=view)
 
 async def sabacc_rules(interaction: discord.Interaction):
     embed = discord.Embed(title="Sabacc Rules", color=0x7289DA)

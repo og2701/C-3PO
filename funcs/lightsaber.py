@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from utils import merge
+from lib.utils import merge
 
 async def lightsaber(interaction: discord.Interaction, emitter: int, switch: int, power_cell: int, crystal_chamber: int):
     choices = [emitter, switch, power_cell, crystal_chamber]

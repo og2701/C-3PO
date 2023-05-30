@@ -2,6 +2,7 @@ import discord
 
 import aiohttp
 from bs4 import BeautifulSoup
+import re
 
 async def archive(interaction: discord.Interaction, query: str):
 

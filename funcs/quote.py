@@ -1,6 +1,8 @@
 import discord
 from discord import Embed
 
+from random import choice
+
 quotes = []
 
 with open("resources/quotes.txt",'r') as f:

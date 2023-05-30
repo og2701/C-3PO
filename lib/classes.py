@@ -2,8 +2,8 @@ import discord
 
 from random import shuffle
 
-from settings import games
-from sabacc_stats import Stats
+from lib.settings import games
+from lib.sabacc_stats import Stats
 
 CPU_PLAYER_NAME = "C-3PO"
 
@@ -81,8 +81,6 @@ class DrawButton(discord.ui.Button):
         game = games[interaction.user.id]
         game.player_draw()
 
-        
-
         if game.draw_count >= 5:
             embed = discord.Embed(title="Maximum cards drawn!", description="Click Stand to end the game.", color=0x7289DA)
         else:
@@ -97,9 +95,16 @@ class DrawButton(discord.ui.Button):
 
         embed.set_thumbnail(url="https://i.imgur.com/3Fa2eXV.png")
 
+        view = discord.ui.View()
+        draw_button = DrawButton()
+        draw_button.disabled = game.game_over
+        stand_button = StandButton()
+        stand_button.disabled = game.game_over
+        view.add_item(draw_button)
+        view.add_item(stand_button)
 
+        await interaction.response.edit_message(embed=embed, view=view)
 
-        await interaction.response.edit_message(embed=embed)
 
 class StandButton(discord.ui.Button):
     def __init__(self):
@@ -122,6 +127,15 @@ class StandButton(discord.ui.Button):
             embed.set_thumbnail(url="https://i.imgur.com/bc0yumE.png")
         elif winner == interaction.user.display_name:
             embed.set_thumbnail(url="https://i.imgur.com/UNKFLb1.png")
-            
 
-        await interaction.response.edit_message(embed=embed)
+        view = discord.ui.View()
+        draw_button = DrawButton()
+        draw_button.disabled = game.game_over
+        stand_button = StandButton()
+        stand_button.disabled = game.game_over
+        view.add_item(draw_button)
+        view.add_item(stand_button)
+
+        await interaction.response.edit_message(embed=embed, view=view)
+
+

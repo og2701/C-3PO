@@ -1,8 +1,8 @@
 import discord
 from discord import app_commands
 
-from commands import quote, archive, duel, lightsaber, sabacc_rules, sabacc
-from settings import token, test_token
+from lib.commands import quote, archive, duel, lightsaber, sabacc_rules, sabacc, translate
+from lib.settings import token, test_token
 
 class aclient(discord.AutoShardedClient):
     def __init__(self):
@@ -49,7 +49,6 @@ async def sabacc_command(interaction: discord.Interaction):
 
 tree.sync
 
-
-
-
 client.run(token)
+
+
