@@ -45,7 +45,7 @@ async def sabacc_command(interaction: discord.Interaction):
 
 tree.sync
 
-client.run(test_token)
+client.run(token)
 
 
 
