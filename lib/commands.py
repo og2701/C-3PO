@@ -3,5 +3,5 @@ from funcs.quote import quote
 from funcs.duel import duel
 from funcs.translate import translate
 from funcs.lightsaber import lightsaber
-from funcs.sabacc import sabacc, sabacc_rules
+from funcs.sabacc import sabacc
 

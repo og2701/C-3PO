@@ -72,7 +72,6 @@ class SabaccGame:
         return " ".join([str(i) for i in self.bot_hand])
 
 
-
 class DrawButton(discord.ui.Button):
     def __init__(self):
         super().__init__(label="Draw", custom_id="draw")
@@ -100,8 +99,11 @@ class DrawButton(discord.ui.Button):
         draw_button.disabled = game.game_over
         stand_button = StandButton()
         stand_button.disabled = game.game_over
+        rules_button = RulesButton()
+        rules_button.disabled = True
         view.add_item(draw_button)
         view.add_item(stand_button)
+        view.add_item(rules_button)
 
         await interaction.response.edit_message(embed=embed, view=view)
 
@@ -133,9 +135,22 @@ class StandButton(discord.ui.Button):
         draw_button.disabled = game.game_over
         stand_button = StandButton()
         stand_button.disabled = game.game_over
+        rules_button = RulesButton()
+        rules_button.disabled = True
         view.add_item(draw_button)
         view.add_item(stand_button)
+        view.add_item(rules_button)
 
         await interaction.response.edit_message(embed=embed, view=view)
 
+class RulesButton(discord.ui.Button):
+    def __init__(self):
+        super().__init__(label="Rules", custom_id="rules")
 
+    async def callback(self, interaction: discord.Interaction):
+        embed = discord.Embed(title="Sabacc Rules", color=0x7289DA)
+        embed.add_field(name="Goal", value="Get as close to 23 or -23 as possible without going over.")
+        embed.add_field(name="Draw", value="Take another card from the deck.")
+        embed.add_field(name="Stand", value="Stick with your current hand.")
+        embed.add_field(name="Winning", value="If your total is closer to 23 or -23 than the dealer's")
+        await interaction.response.send_message(embed=embed)

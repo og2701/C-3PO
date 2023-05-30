@@ -7,7 +7,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from lib.settings import games
-from lib.classes import SabaccGame, DrawButton, StandButton
+from lib.classes import SabaccGame, DrawButton, StandButton, RulesButton
 
 
 async def sabacc(interaction: discord.Interaction):
@@ -37,6 +37,13 @@ async def sabacc(interaction: discord.Interaction):
     view.add_item(draw_button)
     view.add_item(stand_button)
 
+    rules_button = RulesButton()
+
+    view = discord.ui.View()
+    view.add_item(draw_button)
+    view.add_item(stand_button)
+    view.add_item(rules_button)  # Add the rules button to the view
+
     await interaction.response.send_message(embed=embed, view=view)
 
     if game.game_over:
@@ -44,11 +51,3 @@ async def sabacc(interaction: discord.Interaction):
             item.disabled = True
         await interaction.response.edit_message(embed=embed, view=view)
 
-async def sabacc_rules(interaction: discord.Interaction):
-    embed = discord.Embed(title="Sabacc Rules", color=0x7289DA)
-    embed.add_field(name="Goal", value="Get as close to 23 or -23 as possible without going over.")
-    embed.add_field(name="Draw", value="Take another card from the deck.")
-    embed.add_field(name="Stand", value="Stick with your current hand.")
-    embed.add_field(name="Winning", value="If your total is closer to 23 or -23 than the dealer's")
-
-    await interaction.response.send_message(embed=embed)
