@@ -1,0 +1,5 @@
+`archive <search term>` - Search the archive for anything Star Wars related.
+`quote` - Retrieves a random quote from the films (this command does NOT take a parameter).
+`duel <mention someone>` - Duel with another person...
+`translate <phrase to translate>` - Translate English to Aurebesh (written language used in Star Wars)
+`meme` - Get a random meme from hot in r/prequelmemes
