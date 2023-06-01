@@ -1,4 +1,4 @@
 discord
-praw
+praw==7.7.0
 bs4
 pillow
