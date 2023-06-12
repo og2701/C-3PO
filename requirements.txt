@@ -1,4 +1,4 @@
-discord
+discord==2.3.0
 praw
 bs4
 pillow
