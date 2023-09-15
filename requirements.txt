@@ -1,4 +1,4 @@
 discord
 praw
 bs4
-pillow
+pillow==10.0.1
