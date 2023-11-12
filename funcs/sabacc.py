@@ -42,7 +42,7 @@ async def sabacc(interaction: discord.Interaction):
     view = discord.ui.View()
     view.add_item(draw_button)
     view.add_item(stand_button)
-    view.add_item(rules_button)  # Add the rules button to the view
+    view.add_item(rules_button)
 
     await interaction.response.send_message(embed=embed, view=view)
 
