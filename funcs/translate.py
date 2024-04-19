@@ -1,25 +1,46 @@
 import discord
 from discord import File
-
 from PIL import Image, ImageDraw, ImageFont
 from os import remove as delete_file
+import io
 
 async def translate(interaction: discord.Interaction, message: str):
-
-    text = list()
-    for i in range(0, len(message.split()), 4):
-        text.append(' '.join(message.split()[i:i+4]))
-    translated = '\n'.join(text)
-
+    max_width = 800
     font = ImageFont.truetype("resources/Aurebesh.otf", size=30)
-    width = font.getsize(max(text,key=len))[0]
-    height = 23*(len(text))+5
 
-    img = Image.new("RGBA", (width, height), (255,255,255,0))
+    def wrap_text(message, font, max_width):
+        words = message.split()
+        lines = []
+        current_line = []
+        current_width = 0
+        
+        for word in words:
+            word_width, _ = font.getsize(word + ' ')
+            if current_width + word_width <= max_width:
+                current_line.append(word)
+                current_width += word_width
+            else:
+                lines.append(' '.join(current_line))
+                current_line = [word]
+                current_width = word_width
+                
+        lines.append(' '.join(current_line))
+        return lines
+    
+    text_lines = wrap_text(message, font, max_width)
+    translated = '\n'.join(text_lines)
+    
+    width = max_width
+    height = sum(font.getsize(line)[1] for line in text_lines) + 10 * len(text_lines)
+
+    img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
     draw = ImageDraw.Draw(img)
-    draw.text((0,0), translated, (0,0,0), font)
-    img.save(f"resources/{interaction.user.id}.png")
+    current_height = 0
+    for line in text_lines:
+        draw.text((0, current_height), line, (0, 0, 0), font)
+        current_height += font.getsize(line)[1] + 10
 
-    await interaction.response.send_message(file=File(fp=f"resources/{interaction.user.id}.png",filename="translation.png"))
-
-    delete_file(f"resources/{interaction.user.id}.png")
+    with io.BytesIO() as image_binary:
+        img.save(image_binary, 'PNG')
+        image_binary.seek(0)
+        await interaction.response.send_message(file=File(fp=image_binary, filename="translation.png"))
