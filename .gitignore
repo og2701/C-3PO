@@ -4,3 +4,4 @@ Procfile
 *DS_Store*
 filestructure.txt
 command_*
+*.pyc
