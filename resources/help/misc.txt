@@ -1,3 +1,0 @@
-`changeprefix <new prefix>` - Change the prefix that your server uses to communicate with C-3PO (you must have manage_server permissions).
-`invite` - Get the bot auth link to add it to your server.
-`vote` - Vote for the bot
