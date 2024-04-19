@@ -1,5 +1,5 @@
 import discord
-from discord import app_commands, File, Embed, ui, ButtonStyle
+from discord import File, ui, ButtonStyle
 from os import remove as delete_file
 import sys
 from pathlib import Path
@@ -8,8 +8,8 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 from lib.utils import merge
 
 class LightsaberButton(ui.Button):
-    def __init__(self, part, label, colour):
-        super().__init__(label=label, custom_id=f'lightsaber_{part}', style=colour)
+    def __init__(self, part, label, style):
+        super().__init__(label=label, custom_id=f'lightsaber_{part}', style=style)
         self.part = part
 
     async def callback(self, interaction: discord.Interaction):
@@ -20,8 +20,9 @@ class LightsaberButton(ui.Button):
         self.view.choices[self.part - 1] = (self.view.choices[self.part - 1] % 6) + 1
         merge(self.view.choices, interaction.user.id)
 
-        file = discord.File(fp=f"resources/{interaction.user.id}.png", filename="lightsaber.png")
-        await interaction.response.edit_message(content=f'Your choices: {self.view.choices}', view=self.view, attachments=[file])
+        with open(f"resources/{interaction.user.id}.png", "rb") as f:
+            file = discord.File(fp=f, filename="lightsaber.png")
+            await interaction.response.edit_message(content=f'Your choices: {self.view.choices}', view=self.view, attachments=[file])
         delete_file(f"resources/{interaction.user.id}.png")
 
 class LightsaberView(ui.View):
@@ -45,8 +46,9 @@ async def lightsaber(interaction: discord.Interaction):
     view = LightsaberView(interaction.user.id)
     merge(view.choices, interaction.user.id)
     
-    file = discord.File(fp=f"resources/{interaction.user.id}.png", filename="lightsaber.png")
-    await interaction.response.send_message('Select your lightsaber parts:', file=file, view=view)
+    with open(f"resources/{interaction.user.id}.png", "rb") as f:
+        file = discord.File(fp=f, filename="lightsaber.png")
+        await interaction.response.send_message('Select your lightsaber parts:', file=file, view=view)
     delete_file(f"resources/{interaction.user.id}.png")
 
     await view.wait()
