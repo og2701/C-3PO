@@ -1,52 +1,54 @@
 import discord
-
 import aiohttp
 from bs4 import BeautifulSoup
 import re
 
 async def archive(interaction: discord.Interaction, query: str):
-
-    url = "https://starwars.fandom.com/wiki/Special:Search?query={}".format(query.replace(' ','+'))
-
+    search_url = f"https://starwars.fandom.com/wiki/Special:Search?query={query.replace(' ', '+')}"
+    
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            search_page = await resp.text()
+        search_response = await session.get(search_url)
+        search_page = await search_response.text()
 
-    soup = BeautifulSoup(search_page, 'lxml')
-    search_bar = soup.find(class_="unified-search__result__link")
-    search_res = search_bar.get('href')
+        soup = BeautifulSoup(search_page, 'lxml')
+        search_result_link = soup.find(class_="unified-search__result__link")
+        
+        if not search_result_link:
+            await interaction.response.send_message("No results found.")
+            return
+        
+        page_url = search_result_link.get('href')
+        page_response = await session.get(page_url)
+        page_content = await page_response.text()
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(search_res) as resp:
-            page = await resp.text()
+    page_soup = BeautifulSoup(page_content, 'lxml')
 
-    soup = BeautifulSoup(page, 'lxml')
+    embed = discord.Embed(colour=0x7289DA, url=page_url)
+    embed.set_footer(text=page_url)
 
-    Mbed = discord.Embed(colour=0x7289DA, url = search_res)
-    Mbed.set_footer(text=search_res)
+    for meta_tag in page_soup.find_all('meta'):
+        if meta_tag.get('property') == 'og:image':
+            embed.set_image(url=meta_tag.get('content'))
 
-    for ele in soup.find_all('meta'):
-        if ele.get('property') == 'og:image':
-            Mbed.set_image(url=ele.get('content'))
+        if meta_tag.get('property') == 'og:description':
+            description = meta_tag.get('content').replace(
+                "Please update the article to reflect recent events, and remove this template when finished. ", '')
+            if len(description) > 100:
+                description += "..."
+            embed.add_field(name='Description', value=description, inline=True)
 
-        if ele.get('property') == 'og:description':
-            Mbed.add_field(name='Description',value=ele.get('content').replace(
-                "Please update the article to reflect recent events, and remove this template when finished. ", '')+"...",inline=True)
+        if meta_tag.get('property') == 'og:title':
+            embed.set_author(name=meta_tag.get('content'), url=page_url)
 
-        if ele.get('property') == 'og:title':
-            Mbed.set_author(name=ele.get('content'),url=search_res)
+    info = []
+    for div in page_soup.find_all('div', {'data-source': True}):
+        text = re.sub("[\[].*?[\]]", ", ", div.get_text().replace("color", "colour").replace('\n', ': **'))
+        info.append(text[2:-6])
 
-    info = list()
-    for ele in soup.find_all('div'):
-        if ele.get('data-source') != None:
-            info.append(re.sub(
+    while sum(len(i) for i in info) > 1024:
+        info.pop()
 
-                            "[\[].*?[\]]", ", ",ele.get_text().replace("color","colour").replace('\n',': **')
+    if info:
+        embed.add_field(name='Information', value='\n'.join(info), inline=True)
 
-                            )[2:-6])
-    while sum([len(i) for i in info])>1024:
-        info = info[:-1]
-    if info != []:
-        Mbed.add_field(name='Information',value='\n'.join(info),inline=True)
-
-    await interaction.response.send_message(embed=Mbed)
+    await interaction.response.send_message(embed=embed)
