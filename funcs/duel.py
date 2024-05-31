@@ -7,7 +7,6 @@ from requests import get
 from os import remove as delete_file
 
 async def duel(interaction: discord.Interaction, member: discord.Member):
-    # Acknowledge the interaction immediately and defer the response
     await interaction.response.defer()
 
     pfp1 = get(interaction.user.avatar.url.replace('?size=1024', '')).content
