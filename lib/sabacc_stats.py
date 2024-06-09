@@ -4,6 +4,7 @@ from pathlib import Path
 class Stats:
     def __init__(self, user_id):
         self.file_path = Path(f'stats/{user_id}.json')
+        self.file_path.parent.mkdir(parents=True, exist_ok=True)
         self.stats = self.load_stats()
 
     def load_stats(self):
