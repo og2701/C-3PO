@@ -2,3 +2,4 @@ discord
 praw
 bs4
 pillow
+lxml
