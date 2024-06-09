@@ -1,3 +1,4 @@
+import os
 import discord
 from discord import app_commands
 import logging
@@ -5,7 +6,7 @@ import json
 from discord.ext import tasks
 
 from lib.commands import quote, archive, duel, lightsaber, sabacc, translate
-from lib.settings import token, test_token
+from lib.settings import test_token
 
 logging.basicConfig(filename='command_usage.log', level=logging.INFO,
                     format='%(asctime)s:%(levelname)s:%(message)s')
@@ -100,5 +101,7 @@ async def lightsaber_command(interaction: discord.Interaction):
 async def sabacc_command(interaction: discord.Interaction):
     log_command_usage("sabacc", interaction.user)
     await sabacc(interaction)
+
+token = os.getenv('DISCORD_TOKEN')
 
 client.run(token)
