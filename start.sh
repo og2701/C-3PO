@@ -1,5 +1,7 @@
 #!/bin/bash
 
+python3 -m pip install -r requirements.txt
+
 while true
 do
     echo "Starting bot..."
