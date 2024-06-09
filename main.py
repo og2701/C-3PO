@@ -6,7 +6,7 @@ import json
 from discord.ext import tasks
 
 from lib.commands import quote, archive, duel, lightsaber, sabacc, translate
-from lib.settings import test_token
+# from lib.settings import test_token
 
 logging.basicConfig(filename='command_usage.log', level=logging.INFO,
                     format='%(asctime)s:%(levelname)s:%(message)s')
