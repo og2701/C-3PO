@@ -1,5 +1,5 @@
 discord
 praw
 bs4
-pillow
+pillow==10.4.0
 lxml
