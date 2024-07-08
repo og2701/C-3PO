@@ -1,6 +1,6 @@
 # C-3PO Bot
 
-Welcome to the C-3PO Bot repository! This bot offers various Star Wars-related commands for a fun and interactive experience on Discord.
+This bot offers various Star Wars-related commands on Discord.
 
 ## File Structure
 
@@ -44,9 +44,9 @@ Here's an overview of the project structure:
 │   │   │   ├── ...
 │   │   │   └── 6.png
 │   │   └── Switch
-│   │   │   ├── 1.png
-│   │   │   ├── ...
-│   │   │   └── 6.png
+│   │       ├── 1.png
+│   │       ├── ...
+│   │       └── 6.png
 │   └── quotes.txt
 ├── start.sh
 ```
@@ -127,3 +127,36 @@ Here's an overview of the project structure:
 **Embeds and Images:** C-3PO uses embedded messages and images to display results in a visually appealing manner.
 
 **Game Management:** For the `/sabacc` command, C-3PO manages the game state and ensures a smooth gameplay experience.
+
+## Running the Bot
+
+To run the C-3PO bot yourself, follow these steps:
+
+1. **Clone the Repository:**
+    ```sh
+    git clone https://github.com/yourusername/C-3PO.git
+    cd C-3PO
+    ```
+
+2. **Install Dependencies:**
+    Make sure you have Python 3.7+ installed. Then install the required Python packages:
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+3. **Set Up Environment Variables:**
+    Create a `.env` file in the root directory and add your Discord bot token:
+    ```env
+    DISCORD_TOKEN=your-discord-bot-token
+    ```
+
+4. **Run the Bot:**
+    You can run the bot using the provided start script:
+    ```sh
+    ./start.sh
+    ```
+
+    Alternatively, you can run the bot directly with Python:
+    ```sh
+    python main.py
+    ```
