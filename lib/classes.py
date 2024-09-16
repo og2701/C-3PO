@@ -40,43 +40,9 @@ class SabaccGame:
     def hand_total(self, hand):
         return sum(hand)
 
-    def distance_from_target(self, total):
-        return min(abs(23 - total), abs(-23 - total))
-
-    def should_draw(self, current_total, target=23):
-        safe_min = -23 - current_total
-        safe_max = 23 - current_total
-
-        safe_cards = [card for card in self.deck if safe_min <= card <= safe_max]
-        probability_safe = len(safe_cards) / len(self.deck) if self.deck else 0
-
-        return probability_safe > 0.5
-
     def bot_turn(self):
-        while not self.player_stands and not self.game_over:
-            bot_total = self.hand_total(self.bot_hand)
-            player_total = self.hand_total(self.player_hand)
-            
-            bot_distance = self.distance_from_target(bot_total)
-            player_distance = self.distance_from_target(player_total)
-            
-            if bot_distance > player_distance + 2:
-                if self.should_draw(bot_total):
-                    self.draw_card(self.bot_hand)
-                else:
-                    break
-            elif bot_distance > 1:
-                if bot_total < 18 and self.should_draw(bot_total):
-                    self.draw_card(self.bot_hand)
-                else:
-                    break
-            else:
-                break
-            
-            if self.hand_total(self.bot_hand) > 23 or self.hand_total(self.bot_hand) < -23:
-                self.game_over = True
-                break
-        
+        while self.hand_total(self.bot_hand) < 15 and not self.player_stands:
+            self.draw_card(self.bot_hand)
         self.game_over = True
 
     def player_draw(self):
@@ -87,7 +53,8 @@ class SabaccGame:
                 if self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
                     self.game_over = True
             else:
-                self.game_over = True 
+                self.game_over = True
+
         if self.draw_count >= 5 or self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
             self.game_over = True
 
@@ -100,8 +67,9 @@ class SabaccGame:
         if self.game_over:
             player_total = self.hand_total(self.player_hand)
             bot_total = self.hand_total(self.bot_hand)
-            player_distance = self.distance_from_target(player_total)
-            bot_distance = self.distance_from_target(bot_total)
+
+            player_distance = min(abs(23 - player_total), abs(-23 - player_total))
+            bot_distance = min(abs(23 - bot_total), abs(-23 - bot_total))
 
             if player_distance < bot_distance:
                 self.stats.increment_wins()
