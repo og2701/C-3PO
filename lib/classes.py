@@ -25,19 +25,6 @@ from lib.sabacc_stats import Stats
 CPU_PLAYER_NAME = "C-3PO"
 
 
-import discord
-from random import shuffle
-from pathlib import Path
-import sys
-
-sys.path.append(str(Path(__file__).resolve().parent.parent))
-
-from lib.settings import games
-from lib.sabacc_stats import Stats
-
-CPU_PLAYER_NAME = "C-3PO"
-
-
 class SabaccGame:
     def __init__(self, player):
         self.deck = [i for i in range(-10, 11)] * 4
@@ -79,7 +66,7 @@ class SabaccGame:
         return probability_safe > 0.5
 
     def bot_turn(self):
-        while not self.game_over:
+        while not self.player_stands and not self.game_over:
             bot_total = self.hand_total(self.bot_hand)
             player_total = self.hand_total(self.player_hand)
 
@@ -93,7 +80,7 @@ class SabaccGame:
                     break
 
             elif bot_distance > 1:
-                if bot_total < 20 and self.should_draw(bot_total):
+                if bot_total < 18 and self.should_draw(bot_total):
                     self.draw_card(self.bot_hand)
                 else:
                     break
@@ -116,6 +103,7 @@ class SabaccGame:
                     self.game_over = True
             else:
                 self.game_over = True
+
         if self.draw_count >= 5 or self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
             self.game_over = True
 
@@ -147,7 +135,6 @@ class SabaccGame:
 
     def format_b_hand(self):
         return " ".join([str(i) for i in self.bot_hand])
-
 
 
 class DrawButton(discord.ui.Button):
