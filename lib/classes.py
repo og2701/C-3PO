@@ -81,7 +81,7 @@ class SabaccGame:
 
     def bot_turn_medium(self):
         while self.bot_draw_count < self.MAX_BOT_DRAWS and sum(self.bot_hand) < 15 and not self.player_stands:
-            print(self.bot_draw_count, self.MAX_BOT_DRAWS, self.bot_hand, sum(self.bot_hand))
+            logger.info(self.bot_draw_count, self.MAX_BOT_DRAWS, self.bot_hand, sum(self.bot_hand))
             self.draw_card(self.bot_hand)
             self.bot_draw_count += 1
             logger.info(f"Bot drew a card in Medium Mode. Draw count: {self.bot_draw_count}")
