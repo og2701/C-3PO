@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import logging
 
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('SabaccGame')
 
@@ -14,10 +15,11 @@ from lib.sabacc_stats import Stats
 
 CPU_PLAYER_NAME = "C-3PO"
 
+
 class SabaccGame:
     MAX_DRAW_LIMIT = 5
 
-    def __init__(self, player, difficulty='Hard'):
+    def __init__(self, player):
         self.deck = [i for i in range(-10, 11)] * 4
         shuffle(self.deck)
         self.player = player
@@ -26,8 +28,7 @@ class SabaccGame:
         self.player_stands = False
         self.game_over = False
         self.draw_count = 0
-        self.bot_draw_count = 0
-        self.difficulty = difficulty
+        self.bot_draw_count = 0 
         self.stats = Stats(player.id)
 
     def draw_card(self, hand):
@@ -62,9 +63,12 @@ class SabaccGame:
     def should_draw(self, current_total):
         safe_min = -23 - current_total
         safe_max = 23 - current_total
+
         safe_cards = [card for card in self.deck if safe_min <= card <= safe_max]
         probability_safe = len(safe_cards) / len(self.deck) if self.deck else 0
+
         logger.debug(f'Bot should_draw assessment: Safe Cards={safe_cards}, Probability Safe={probability_safe:.2f}')
+
         return probability_safe > 0.5
 
     def bot_turn(self):
@@ -72,81 +76,37 @@ class SabaccGame:
         while not self.game_over:
             bot_total = self.hand_total(self.bot_hand)
             player_total = self.hand_total(self.player_hand)
+
             bot_distance = self.distance_from_target(bot_total)
             player_distance = self.distance_from_target(player_total)
 
-            if self.difficulty == 'Hard':
-                if bot_distance > player_distance + 2:
-                    if self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                        logger.debug('Bot decides to draw (significantly worse).')
-                        self.draw_card(self.bot_hand)
-                        self.bot_draw_count += 1
-                        logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
-                    else:
-                        logger.debug('Bot decides to stand (significantly worse but chose not to draw).')
-                        break
-                elif bot_distance > 1:
-                    if bot_total < 20 and self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                        logger.debug('Bot decides to draw (slightly worse and total < 20).')
-                        self.draw_card(self.bot_hand)
-                        self.bot_draw_count += 1
-                        logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
-                    else:
-                        logger.debug('Bot decides to stand (slightly worse but chooses not to draw).')
-                        break
+            if bot_distance > player_distance + 2:
+                if self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
+                    logger.debug('Bot decides to draw (significantly worse).')
+                    self.draw_card(self.bot_hand)
+                    self.bot_draw_count += 1
+                    logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
                 else:
-                    logger.debug('Bot decides to stand (close enough to target).')
+                    logger.debug('Bot decides to stand (significantly worse but chose not to draw).')
                     break
 
-            elif self.difficulty == 'Medium':
-                if bot_distance > player_distance + 1:
-                    if self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                        logger.debug('Bot decides to draw (moderately worse).')
-                        self.draw_card(self.bot_hand)
-                        self.bot_draw_count += 1
-                        logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
-                    else:
-                        logger.debug('Bot decides to stand (moderately worse but chose not to draw).')
-                        break
-                elif bot_distance > 1:
-                    if bot_total < 18 and self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                        logger.debug('Bot decides to draw (slightly worse and total < 18).')
-                        self.draw_card(self.bot_hand)
-                        self.bot_draw_count += 1
-                        logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
-                    else:
-                        logger.debug('Bot decides to stand (slightly worse but chooses not to draw).')
-                        break
+            elif bot_distance > 1:
+                if bot_total < 20 and self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
+                    logger.debug('Bot decides to draw (slightly worse and total < 20).')
+                    self.draw_card(self.bot_hand)
+                    self.bot_draw_count += 1
+                    logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
                 else:
-                    logger.debug('Bot decides to stand (close enough to target).')
+                    logger.debug('Bot decides to stand (slightly worse but chooses not to draw).')
                     break
 
-            elif self.difficulty == 'Easy':
-                if bot_distance > 2:
-                    if self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                        logger.debug('Bot decides to draw (significantly worse).')
-                        self.draw_card(self.bot_hand)
-                        self.bot_draw_count += 1
-                        logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
-                    else:
-                        logger.debug('Bot decides to stand (significantly worse but chose not to draw).')
-                        break
-                elif bot_distance > 1:
-                    if bot_total < 16 and self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                        logger.debug('Bot decides to draw (slightly worse and total < 16).')
-                        self.draw_card(self.bot_hand)
-                        self.bot_draw_count += 1
-                        logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
-                    else:
-                        logger.debug('Bot decides to stand (slightly worse but chooses not to draw).')
-                        break
-                else:
-                    logger.debug('Bot decides to stand (close enough to target).')
-                    break
+            else:
+                logger.debug('Bot decides to stand (close enough to target).')
+                break
 
             bot_total_after_draw = self.hand_total(self.bot_hand)
             if bot_total_after_draw > 23 or bot_total_after_draw < -23:
-                logger.debug(f'Bot busts after drawing. Total: {bot_total_after_draw}')
+                logger.debug('Bot busts after drawing.')
                 self.game_over = True
                 break
 
@@ -166,6 +126,7 @@ class SabaccGame:
             else:
                 logger.debug('Player has reached the maximum number of additional draws.')
                 self.game_over = True
+
         if self.draw_count >= self.MAX_DRAW_LIMIT or self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
             logger.debug('Game over due to player draw limit or bust.')
             self.game_over = True
@@ -205,6 +166,7 @@ class SabaccGame:
 
     def format_b_hand(self):
         return " ".join([str(i) for i in self.bot_hand])
+
 
 
 class DrawButton(discord.ui.Button):
