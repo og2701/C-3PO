@@ -2,6 +2,10 @@ import discord
 from random import shuffle, randint
 from lib.settings import games
 from lib.sabacc_stats import Stats
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 CPU_PLAYER_NAME = "C-3PO"
 
@@ -24,7 +28,9 @@ class SabaccGame:
 
     def select_mode(self):
         modes = ['Easy', 'Medium', 'Hard']
-        return modes[randint(0, 2)]
+        selected_mode = modes[randint(0, 2)]
+        logger.info(f"Selected game mode: {selected_mode}")
+        return selected_mode
 
     def get_mode_description(self):
         descriptions = {
@@ -36,16 +42,20 @@ class SabaccGame:
 
     def draw_card(self, hand):
         if not self.deck:
+            logger.info("Deck exhausted. Cannot draw more cards.")
             self.game_over = True
             return None
         card = self.deck.pop()
         hand.append(card)
+        logger.info(f"Drew card: {card}. New total: {sum(hand)}")
         return card
 
     def start_game(self):
         for _ in range(2):
             self.draw_card(self.player_hand)
             self.draw_card(self.bot_hand)
+        self.bot_draw_count = 2
+        logger.info(f"Game started. Player's hand: {self.player_hand}, Bot's hand: {self.bot_hand}")
 
     def hand_total(self, hand):
         return sum(hand)
@@ -58,42 +68,53 @@ class SabaccGame:
         elif self.mode == 'Hard':
             self.bot_turn_hard()
         self.game_over = True
+        logger.info("Bot's turn ended.")
 
     def bot_turn_easy(self):
         while self.bot_draw_count < self.MAX_BOT_DRAWS and randint(0, 1) == 1 and not self.player_stands:
             self.draw_card(self.bot_hand)
             self.bot_draw_count += 1
+            logger.info(f"Bot drew a card in Easy Mode. Draw count: {self.bot_draw_count}")
 
     def bot_turn_medium(self):
         while self.bot_draw_count < self.MAX_BOT_DRAWS and sum(self.bot_hand) < 15 and not self.player_stands:
             self.draw_card(self.bot_hand)
             self.bot_draw_count += 1
+            logger.info(f"Bot drew a card in Medium Mode. Draw count: {self.bot_draw_count}")
 
     def bot_turn_hard(self):
         while self.bot_draw_count < self.MAX_BOT_DRAWS:
             bot_total = sum(self.bot_hand)
-            
+            logger.info(f"Bot's current total in Hard Mode: {bot_total}")
+
             if bot_total <= -20:
+                logger.info("Bot decides to stop drawing to avoid busting towards -23.")
                 break
 
             distance_to_23 = abs(23 - bot_total)
             distance_to_neg23 = abs(-23 - bot_total)
-            
+
             target = 23 if distance_to_23 <= distance_to_neg23 else -23
-            
+            logger.info(f"Bot's target in Hard Mode: {target}")
+
             potential_moves = [bot_total + card for card in self.deck]
-            
+
             if not potential_moves:
+                logger.info("No potential moves left for the bot.")
                 break
 
             best_move = min(potential_moves, key=lambda x: abs(target - x))
             new_distance = abs(target - best_move)
             current_distance = abs(target - bot_total)
-            
+
+            logger.info(f"Bot evaluates best move: {best_move} with new distance: {new_distance}")
+
             if new_distance < current_distance and (-23 < best_move < 23):
                 self.draw_card(self.bot_hand)
                 self.bot_draw_count += 1
+                logger.info(f"Bot draws a card in Hard Mode. Draw count: {self.bot_draw_count}")
             else:
+                logger.info("Bot decides to stop drawing as no better moves are available.")
                 break
 
     def player_draw(self):
@@ -101,12 +122,17 @@ class SabaccGame:
             if self.draw_count < 5:
                 self.draw_card(self.player_hand)
                 self.draw_count += 1
+                logger.info(f"Player drew a card. Draw count: {self.draw_count}")
+            else:
+                logger.info("Player has reached the maximum number of draws.")
             if sum(self.player_hand) > 23 or sum(self.player_hand) < -23:
+                logger.info("Player has busted.")
                 self.game_over = True
 
     def player_stand(self):
         if not self.game_over:
             self.player_stands = True
+            logger.info("Player stands. Bot will take its turn.")
             self.bot_turn()
 
     def get_winner(self):
@@ -115,13 +141,18 @@ class SabaccGame:
             bot_total = sum(self.bot_hand)
             player_distance = min(abs(23 - player_total), abs(-23 - player_total))
             bot_distance = min(abs(23 - bot_total), abs(-23 - bot_total))
+            logger.info(f"Player Total: {player_total}, Bot Total: {bot_total}")
+            logger.info(f"Player Distance: {player_distance}, Bot Distance: {bot_distance}")
             if player_distance < bot_distance:
                 self.stats.increment_wins()
+                logger.info("Player wins.")
                 return self.player.display_name
             elif player_distance > bot_distance:
                 self.stats.increment_losses()
+                logger.info("Bot wins.")
                 return CPU_PLAYER_NAME
             else:
+                logger.info("It's a tie.")
                 return "It's a tie!"
         return None
 
@@ -130,6 +161,9 @@ class SabaccGame:
 
     def format_b_hand(self):
         return " ".join([str(i) for i in self.bot_hand])
+
+    def get_b_draw_count(self):
+        return f"Cards Drawn: {self.bot_draw_count}/5"
 
 class DrawButton(discord.ui.Button):
     def __init__(self):
@@ -157,6 +191,7 @@ class DrawButton(discord.ui.Button):
         embed.add_field(name="C-3PO's Hand", value="??", inline=False)
         embed.add_field(name="C-3PO's Total", value="??", inline=False)
         embed.add_field(name="Mode", value=game.mode_description, inline=False)
+        embed.add_field(name="C-3PO's Draws", value=game.bot_draw_count, inline=False)
 
         embed.set_footer(text=game.stats.format_stats())
         embed.set_thumbnail(url="https://i.imgur.com/3Fa2eXV.png")
@@ -202,6 +237,7 @@ class StandButton(discord.ui.Button):
         embed.add_field(name="C-3PO's Hand", value=game.format_b_hand(), inline=False)
         embed.add_field(name="C-3PO's Total", value=str(sum(game.bot_hand)), inline=False)
         embed.add_field(name="Mode", value=game.mode_description, inline=False)
+        embed.add_field(name="C-3PO's Draws", value=game.bot_draw_count, inline=False)
 
         embed.set_footer(text=game.stats.format_stats())
 
@@ -236,7 +272,7 @@ class RulesButton(discord.ui.Button):
         embed.add_field(name="Draw", value="Take another card from the deck to add to your hand.", inline=False)
         embed.add_field(name="Stand", value="Stick with your current hand and end your turn.", inline=False)
         embed.add_field(name="Winning", value="If your total is closer to **23** or **-23** than C-3PO's, you win!", inline=False)
-        embed.add_field(name="Limits", value="You can draw a maximum of **5** cards. Exceeding the total range of **-23** to **23** results in an immediate loss.", inline=False)
+        embed.add_field(name="Limits", value="You can draw a maximum of **5** cards. C-3PO can also draw a maximum of **5** cards. Exceeding the total range of **-23** to **23** results in an immediate loss.", inline=False)
         embed.add_field(name="Tie", value="If both you and C-3PO are equally close to the target, the game is a tie.", inline=False)
         embed.add_field(name="AI Behavior", value="In **Hard Mode**, C-3PO employs an optimal strategy to minimize the distance to the target.", inline=False)
         embed.set_footer(text="Good luck!")
