@@ -4,9 +4,7 @@ from bs4 import BeautifulSoup
 import re
 from urllib.parse import quote_plus
 
-session = aiohttp.ClientSession()
-
-async def fetch(url: str) -> str:
+async def fetch(session, url: str) -> str:
     try:
         async with session.get(url) as response:
             response.raise_for_status()
@@ -55,10 +53,11 @@ def extract_information(page_soup: BeautifulSoup) -> str:
     return '\n'.join(filtered_info)
 
 async def archive(interaction: discord.Interaction, query: str):
+    session = aiohttp.ClientSession()
     encoded_query = quote_plus(query)
     search_url = f"https://starwars.fandom.com/wiki/Special:Search?query={encoded_query}"
     
-    search_page = await fetch(search_url)
+    search_page = await fetch(session, search_url)
     if not search_page:
         await interaction.response.send_message("Failed to fetch search results.")
         return
@@ -71,7 +70,7 @@ async def archive(interaction: discord.Interaction, query: str):
         return
     
     page_url = search_result_link.get('href')
-    page_content = await fetch(page_url)
+    page_content = await fetch(session, page_url)
     if not page_content:
         await interaction.response.send_message("Failed to fetch the page content.")
         return
