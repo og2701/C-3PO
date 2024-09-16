@@ -24,7 +24,6 @@ async def sabacc(interaction: discord.Interaction):
     embed.add_field(name="C-3PO's Hand", value="??", inline=False)
     embed.add_field(name="C-3PO's Total", value="??", inline=False)
     embed.add_field(name="Mode", value=game.mode_description, inline=False)
-    embed.add_field(name="C-3PO's Draws", value=game.bot_draw_count, inline=False)
 
     embed.set_thumbnail(url="https://i.imgur.com/3Fa2eXV.png")
     embed.set_footer(text=game.stats.format_stats())

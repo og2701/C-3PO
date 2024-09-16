@@ -54,7 +54,6 @@ class SabaccGame:
         for _ in range(2):
             self.draw_card(self.player_hand)
             self.draw_card(self.bot_hand)
-        self.bot_draw_count = 2
         logger.info(f"Game started. Player's hand: {self.player_hand}, Bot's hand: {self.bot_hand}")
 
     def hand_total(self, hand):
@@ -162,9 +161,6 @@ class SabaccGame:
     def format_b_hand(self):
         return " ".join([str(i) for i in self.bot_hand])
 
-    def get_b_draw_count(self):
-        return f"Cards Drawn: {self.bot_draw_count}/5"
-
 class DrawButton(discord.ui.Button):
     def __init__(self):
         super().__init__(label="Draw", style=discord.ButtonStyle.primary, custom_id="draw")
@@ -191,7 +187,6 @@ class DrawButton(discord.ui.Button):
         embed.add_field(name="C-3PO's Hand", value="??", inline=False)
         embed.add_field(name="C-3PO's Total", value="??", inline=False)
         embed.add_field(name="Mode", value=game.mode_description, inline=False)
-        embed.add_field(name="C-3PO's Draws", value=game.bot_draw_count, inline=False)
 
         embed.set_footer(text=game.stats.format_stats())
         embed.set_thumbnail(url="https://i.imgur.com/3Fa2eXV.png")
@@ -237,7 +232,6 @@ class StandButton(discord.ui.Button):
         embed.add_field(name="C-3PO's Hand", value=game.format_b_hand(), inline=False)
         embed.add_field(name="C-3PO's Total", value=str(sum(game.bot_hand)), inline=False)
         embed.add_field(name="Mode", value=game.mode_description, inline=False)
-        embed.add_field(name="C-3PO's Draws", value=game.bot_draw_count, inline=False)
 
         embed.set_footer(text=game.stats.format_stats())
 
@@ -272,7 +266,7 @@ class RulesButton(discord.ui.Button):
         embed.add_field(name="Draw", value="Take another card from the deck to add to your hand.", inline=False)
         embed.add_field(name="Stand", value="Stick with your current hand and end your turn.", inline=False)
         embed.add_field(name="Winning", value="If your total is closer to **23** or **-23** than C-3PO's, you win!", inline=False)
-        embed.add_field(name="Limits", value="You can draw a maximum of **5** cards. C-3PO can also draw a maximum of **5** cards. Exceeding the total range of **-23** to **23** results in an immediate loss.", inline=False)
+        embed.add_field(name="Limits", value="You can draw a maximum of **5** cards. Exceeding the total range of **-23** to **23** results in an immediate loss.", inline=False)
         embed.add_field(name="Tie", value="If both you and C-3PO are equally close to the target, the game is a tie.", inline=False)
         embed.add_field(name="AI Behavior", value="In **Hard Mode**, C-3PO employs an optimal strategy to minimize the distance to the target.", inline=False)
         embed.set_footer(text="Good luck!")
