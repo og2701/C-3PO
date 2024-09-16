@@ -14,11 +14,8 @@ async def sabacc(interaction: discord.Interaction):
     if interaction.user.id in games:
         game = games[interaction.user.id]
         if not game.game_over:
-            await interaction.response.send_message("You already have a game in progress.", ephemeral=True)
+            await interaction.response.send_message("You already have a game in progress.")
             return
-        else:
-            del games[interaction.user.id]
-    
     game = SabaccGame(interaction.user)
     games[interaction.user.id] = game
     game.start_game()
@@ -26,7 +23,7 @@ async def sabacc(interaction: discord.Interaction):
     embed = discord.Embed(title="Sabacc", color=0x7289DA)
 
     embed.add_field(name="Your Hand", value=game.format_p_hand(), inline=False)
-    embed.add_field(name="Your Total", value=str(game.hand_total(game.player_hand)), inline=False)
+    embed.add_field(name="Your Total", value=str(sum(game.player_hand)), inline=False)
     embed.add_field(name="C-3PO's Hand", value="??", inline=False)
     embed.add_field(name="C-3PO's Total", value="??", inline=False)
 
@@ -35,6 +32,11 @@ async def sabacc(interaction: discord.Interaction):
 
     draw_button = DrawButton()
     stand_button = StandButton()
+
+    view = discord.ui.View()
+    view.add_item(draw_button)
+    view.add_item(stand_button)
+
     rules_button = RulesButton()
 
     view = discord.ui.View()
@@ -47,4 +49,5 @@ async def sabacc(interaction: discord.Interaction):
     if game.game_over:
         for item in view.children:
             item.disabled = True
-        await interaction.edit_original_response(embed=embed, view=view)
+        await interaction.response.edit_message(embed=embed, view=view)
+
