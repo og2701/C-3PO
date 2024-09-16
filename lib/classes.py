@@ -1,5 +1,3 @@
-# lib/classes.py
-
 import discord
 from random import shuffle, randint
 from lib.settings import games
@@ -8,6 +6,8 @@ from lib.sabacc_stats import Stats
 CPU_PLAYER_NAME = "C-3PO"
 
 class SabaccGame:
+    MAX_BOT_DRAWS = 5
+
     def __init__(self, player):
         self.deck = [i for i in range(-10, 11)] * 4
         shuffle(self.deck)
@@ -17,6 +17,7 @@ class SabaccGame:
         self.player_stands = False
         self.game_over = False
         self.draw_count = 0
+        self.bot_draw_count = 0
         self.stats = Stats(player.id)
         self.mode = self.select_mode()
         self.mode_description = self.get_mode_description()
@@ -59,21 +60,39 @@ class SabaccGame:
         self.game_over = True
 
     def bot_turn_easy(self):
-        while randint(0, 1) == 1 and not self.player_stands:
+        while self.bot_draw_count < self.MAX_BOT_DRAWS and randint(0, 1) == 1 and not self.player_stands:
             self.draw_card(self.bot_hand)
+            self.bot_draw_count += 1
 
     def bot_turn_medium(self):
-        while sum(self.bot_hand) < 15 and not self.player_stands:
+        while self.bot_draw_count < self.MAX_BOT_DRAWS and sum(self.bot_hand) < 15 and not self.player_stands:
             self.draw_card(self.bot_hand)
+            self.bot_draw_count += 1
 
     def bot_turn_hard(self):
-        while True:
+        while self.bot_draw_count < self.MAX_BOT_DRAWS:
             bot_total = sum(self.bot_hand)
-            player_total = sum(self.player_hand)
-            potential_totals = [bot_total + card for card in self.deck]
-            best_move = min(potential_totals, key=lambda x: min(abs(23 - x), abs(-23 - x)))
-            if min(abs(23 - best_move), abs(-23 - best_move)) < min(abs(23 - bot_total), abs(-23 - bot_total)):
+            
+            if bot_total <= -20:
+                break
+
+            distance_to_23 = abs(23 - bot_total)
+            distance_to_neg23 = abs(-23 - bot_total)
+            
+            target = 23 if distance_to_23 <= distance_to_neg23 else -23
+            
+            potential_moves = [bot_total + card for card in self.deck]
+            
+            if not potential_moves:
+                break
+
+            best_move = min(potential_moves, key=lambda x: abs(target - x))
+            new_distance = abs(target - best_move)
+            current_distance = abs(target - bot_total)
+            
+            if new_distance < current_distance and (-23 < best_move < 23):
                 self.draw_card(self.bot_hand)
+                self.bot_draw_count += 1
             else:
                 break
 
@@ -216,8 +235,9 @@ class RulesButton(discord.ui.Button):
         embed.add_field(name="Game Modes", value="Each game randomly selects a difficulty level that affects C-3PO's strategy.", inline=False)
         embed.add_field(name="Draw", value="Take another card from the deck to add to your hand.", inline=False)
         embed.add_field(name="Stand", value="Stick with your current hand and end your turn.", inline=False)
-        embed.add_field(name="Winning", value="If your total is closer to 23 or -23 than C-3PO's, you win!", inline=False)
-        embed.add_field(name="Limits", value="You can draw a maximum of **5** additional cards. Exceeding the total range of -23 to 23 results in an immediate loss.", inline=False)
+        embed.add_field(name="Winning", value="If your total is closer to **23** or **-23** than C-3PO's, you win!", inline=False)
+        embed.add_field(name="Limits", value="You can draw a maximum of **5** cards. Exceeding the total range of **-23** to **23** results in an immediate loss.", inline=False)
         embed.add_field(name="Tie", value="If both you and C-3PO are equally close to the target, the game is a tie.", inline=False)
+        embed.add_field(name="AI Behavior", value="In **Hard Mode**, C-3PO employs an optimal strategy to minimize the distance to the target.", inline=False)
         embed.set_footer(text="Good luck!")
         await interaction.response.send_message(embed=embed, ephemeral=True)
