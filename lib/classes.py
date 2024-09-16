@@ -56,18 +56,32 @@ class HardStrategy(BotStrategy):
                 player_distance = min(abs(23 - player_total), abs(-23 - player_total))
                 bot_distance = min(abs(23 - bot_total), abs(-23 - bot_total))
 
-                if bot_distance < player_distance:
+                distance_to_23 = abs(23 - bot_total)
+                distance_to_neg23 = abs(-23 - bot_total)
+
+                if distance_to_neg23 < distance_to_23:
+                    target = -23
+                elif distance_to_23 < distance_to_neg23:
+                    target = 23
+                else:
+                    target = 23
+
+                distance_to_target = min(abs(23 - bot_total), abs(-23 - bot_total))
+
+                if distance_to_target < player_distance:
                     simulated_game_over = True
                     break
-                elif bot_distance == player_distance:
+                elif distance_to_target == player_distance:
                     should_draw = True
                 else:
-                    beneficial_cards = [card for card in simulated_deck if
-                                        (23 - bot_total) * card > 0 or
-                                        (-23 - bot_total) * card > 0]
+                    if target == -23:
+                        beneficial_cards = [card for card in simulated_deck if card < 0]
+                    else:
+                        beneficial_cards = [card for card in simulated_deck if card > 0]
+
                     beneficial_probability = len(beneficial_cards) / len(simulated_deck) if simulated_deck else 0
 
-                    should_draw = beneficial_probability > 0.55
+                    should_draw = beneficial_probability > 0.3
 
                 if should_draw and simulated_deck:
                     drawn_card = simulated_deck.pop(randint(0, len(simulated_deck) - 1))
@@ -84,8 +98,10 @@ class HardStrategy(BotStrategy):
 
             final_bot_total = sum(simulated_bot_hand)
             final_player_total = sum(game.player_hand)
+
             if final_bot_total > 23 or final_bot_total < -23:
                 continue
+
             final_bot_distance = min(abs(23 - final_bot_total), abs(-23 - final_bot_total))
             final_player_distance = min(abs(23 - final_player_total), abs(-23 - final_player_total))
 
@@ -99,7 +115,7 @@ class HardStrategy(BotStrategy):
         player_total = sum(game.player_hand)
         player_distance = min(abs(23 - player_total), abs(-23 - player_total))
         bot_distance = min(abs(23 - bot_total), abs(-23 - bot_total))
-        
+
         if bot_distance < player_distance:
             logger.debug("HardStrategy Decision: Stand (Better than player)")
             return False
@@ -108,8 +124,8 @@ class HardStrategy(BotStrategy):
         else:
             win_probability = self.monte_carlo_simulation(game)
             logger.debug(f"HardStrategy Monte Carlo Win Probability: {win_probability:.2%}")
-            decision = win_probability > 0.55
-        
+            decision = win_probability > 0.3
+
         logger.debug(f"HardStrategy Decision: {'Draw' if decision else 'Stand'}")
         return decision
 
