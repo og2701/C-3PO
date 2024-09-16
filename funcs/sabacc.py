@@ -19,6 +19,7 @@ async def sabacc(interaction: discord.Interaction):
     game = SabaccGame(interaction.user)
     games[interaction.user.id] = game
     game.start_game()
+    game.bot_turn()
 
     embed = discord.Embed(title="Sabacc", color=0x7289DA)
     embed.add_field(name="Your Hand", value=game.format_p_hand(), inline=False)
