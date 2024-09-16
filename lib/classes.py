@@ -12,6 +12,19 @@ from lib.sabacc_stats import Stats
 CPU_PLAYER_NAME = "C-3PO"
 
 
+import discord
+from random import shuffle
+from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from lib.settings import games
+from lib.sabacc_stats import Stats
+
+CPU_PLAYER_NAME = "C-3PO"
+
+
 class SabaccGame:
     def __init__(self, player):
         self.deck = [i for i in range(-10, 11)] * 4
@@ -43,7 +56,7 @@ class SabaccGame:
     def distance_from_target(self, total):
         return min(abs(23 - total), abs(-23 - total))
 
-    def should_draw(self, current_total, target=23):
+    def should_draw(self, current_total):
         safe_min = -23 - current_total
         safe_max = 23 - current_total
 
@@ -56,27 +69,29 @@ class SabaccGame:
         while not self.player_stands and not self.game_over:
             bot_total = self.hand_total(self.bot_hand)
             player_total = self.hand_total(self.player_hand)
-            
+
             bot_distance = self.distance_from_target(bot_total)
             player_distance = self.distance_from_target(player_total)
-            
+
             if bot_distance > player_distance + 2:
                 if self.should_draw(bot_total):
                     self.draw_card(self.bot_hand)
                 else:
                     break
+
             elif bot_distance > 1:
                 if bot_total < 18 and self.should_draw(bot_total):
                     self.draw_card(self.bot_hand)
                 else:
                     break
+
             else:
                 break
-            
+
             if self.hand_total(self.bot_hand) > 23 or self.hand_total(self.bot_hand) < -23:
                 self.game_over = True
                 break
-        
+
         self.game_over = True
 
     def player_draw(self):
@@ -87,7 +102,8 @@ class SabaccGame:
                 if self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
                     self.game_over = True
             else:
-                self.game_over = True 
+                self.game_over = True
+
         if self.draw_count >= 5 or self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
             self.game_over = True
 
