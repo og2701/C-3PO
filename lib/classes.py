@@ -149,12 +149,7 @@ class SabaccGame:
                 logger.info(f"Bot decides to stop drawing in {self.mode} Mode.")
                 self.game_over = True
                 break
-
-        if not self.game_over:
-            logger.info(f"Bot reached the maximum number of draws ({self.MAX_BOT_DRAWS}).")
-            self.game_over = True
         logger.info("Bot's turn ended.")
-
 
     def player_draw(self):
         if not self.game_over:
