@@ -70,7 +70,7 @@ class SabaccGame:
         logger.info("Bot's turn ended.")
 
     def bot_turn_easy(self):
-        while self.bot_draw_count < self.MAX_BOT_DRAWS and not self.player_stands:
+        while self.bot_draw_count < self.MAX_BOT_DRAWS:
             if randint(0, 1) == 1:
                 self.draw_card(self.bot_hand)
                 self.bot_draw_count += 1
@@ -79,8 +79,9 @@ class SabaccGame:
                 logger.info("Bot decides to stop drawing in Easy Mode.")
                 break
 
+
     def bot_turn_medium(self):
-        while self.bot_draw_count < self.MAX_BOT_DRAWS and not self.player_stands:
+        while self.bot_draw_count < self.MAX_BOT_DRAWS:
             if sum(self.bot_hand) < 15:
                 self.draw_card(self.bot_hand)
                 self.bot_draw_count += 1
@@ -88,6 +89,7 @@ class SabaccGame:
             else:
                 logger.info(f"Bot stops drawing as its total is {sum(self.bot_hand)} which is >= 15.")
                 break
+
 
 
     def bot_turn_hard(self):
