@@ -30,14 +30,17 @@ def wrap_text(message: str, font: ImageFont.FreeTypeFont, max_width: int) -> lis
     for para in paragraphs:
         wrapped = textwrap.wrap(para, width=100)
         for line in wrapped:
-            while font.getsize(line)[0] > max_width:
+            while font.getbbox(line)[2] > max_width:
                 for i in range(len(line), 0, -1):
-                    if font.getsize(line[:i])[0] <= max_width:
+                    if font.getbbox(line[:i])[2] <= max_width:
                         break
+                if i == 0:
+                    i = 1
                 lines.append(line[:i])
                 line = line[i:]
             lines.append(line)
     return lines
+
 
 def calculate_image_size(text_lines: list, font: ImageFont.FreeTypeFont, max_width: int, padding: int = PADDING, line_spacing: int = LINE_SPACING) -> tuple:
     ascent, descent = font.getmetrics()
