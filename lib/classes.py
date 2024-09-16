@@ -9,75 +9,6 @@ logger = logging.getLogger(__name__)
 
 CPU_PLAYER_NAME = "C-3PO"
 
-class BotStrategy:
-    def decide_draw(self, game):
-        raise NotImplementedError
-
-class EasyStrategy(BotStrategy):
-    def decide_draw(self, game):
-        bot_total = sum(game.bot_hand)
-        if bot_total < 10:
-            draw_probability = 0.7
-        elif bot_total < 15:
-            draw_probability = 0.5
-        else:
-            draw_probability = 0.3
-        decision = randint(1, 100) <= int(draw_probability * 100)
-        logger.debug(f"EasyStrategy Decision: {'Draw' if decision else 'Stand'}")
-        return decision
-
-class MediumStrategy(BotStrategy):
-    def decide_draw(self, game):
-        bot_total = sum(game.bot_hand)
-        player_total = sum(game.player_hand)
-        player_distance = min(abs(23 - player_total), abs(-23 - player_total))
-        
-        if player_distance <= 5:
-            draw_threshold = 15
-        else:
-            draw_threshold = 18
-        
-        decision = bot_total < draw_threshold
-        logger.debug(f"MediumStrategy Decision: {'Draw' if decision else 'Stand'} (Threshold: {draw_threshold})")
-        return decision
-
-class HardStrategy(BotStrategy):
-    def monte_carlo_simulation(self, game, trials=1000):
-        successes = 0
-        for _ in range(trials):
-            if not game.deck:
-                continue
-            simulated_deck = game.deck.copy()
-            simulated_card = simulated_deck.pop(randint(0, len(simulated_deck) - 1))
-            simulated_bot_total = sum(game.bot_hand) + simulated_card
-            simulated_player_total = sum(game.player_hand)
-            
-            simulated_bot_distance = min(abs(23 - simulated_bot_total), abs(-23 - simulated_bot_total))
-            simulated_player_distance = min(abs(23 - simulated_player_total), abs(-23 - simulated_player_total))
-            
-            if simulated_bot_distance < simulated_player_distance:
-                successes += 1
-        return successes / trials if trials > 0 else 0
-
-    def decide_draw(self, game):
-        bot_total = sum(game.bot_hand)
-        player_total = sum(game.player_hand)
-        player_distance = min(abs(23 - player_total), abs(-23 - player_total))
-        bot_distance = min(abs(23 - bot_total), abs(-23 - bot_total))
-        
-        if bot_distance < player_distance:
-            logger.debug("HardStrategy Decision: Stand (Better than player)")
-            return False
-        elif bot_distance == player_distance:
-            decision = True
-        else:
-            win_probability = self.monte_carlo_simulation(game)
-            logger.debug(f"HardStrategy Monte Carlo Win Probability: {win_probability:.2%}")
-            decision = win_probability > 0.55
-        
-        logger.debug(f"HardStrategy Decision: {'Draw' if decision else 'Stand'}")
-        return decision
-
 class SabaccGame:
     MAX_BOT_DRAWS = 5
 
@@ -94,7 +25,6 @@ class SabaccGame:
         self.stats = Stats(player.id)
         self.mode = self.select_mode()
         self.mode_description = self.get_mode_description()
-        self.strategy = self.select_strategy()
 
     def select_mode(self):
         modes = ['Easy', 'Medium', 'Hard']
@@ -104,19 +34,11 @@ class SabaccGame:
 
     def get_mode_description(self):
         descriptions = {
-            'Easy': "Easy Mode: C-3PO draws cards based on a simple probability.",
-            'Medium': "Medium Mode: C-3PO draws based on basic strategic thresholds.",
-            'Hard': "Hard Mode: C-3PO uses advanced strategies and simulations."
+            'Easy': "Easy Mode: C-3PO draws cards randomly.",
+            'Medium': "Medium Mode: C-3PO draws until a decent total is reached.",
+            'Hard': "Hard Mode: C-3PO employs optimal strategy using probabilities."
         }
         return descriptions[self.mode]
-
-    def select_strategy(self):
-        if self.mode == 'Easy':
-            return EasyStrategy()
-        elif self.mode == 'Medium':
-            return MediumStrategy()
-        elif self.mode == 'Hard':
-            return HardStrategy()
 
     def draw_card(self, hand):
         if not self.deck:
@@ -138,18 +60,83 @@ class SabaccGame:
         return sum(hand)
 
     def bot_turn(self):
-        logger.info(f"C-3PO's turn started in {self.mode} Mode.")
-        while self.bot_draw_count < self.MAX_BOT_DRAWS and not self.game_over:
-            should_draw = self.strategy.decide_draw(self)
-            if should_draw:
+        if self.mode == 'Easy':
+            self.bot_turn_easy()
+        elif self.mode == 'Medium':
+            self.bot_turn_medium()
+        elif self.mode == 'Hard':
+            self.bot_turn_hard()
+        self.game_over = True
+        logger.info("Bot's turn ended.")
+
+    def bot_turn_easy(self):
+        while self.bot_draw_count < self.MAX_BOT_DRAWS:
+            if randint(0, 1) == 1:
                 self.draw_card(self.bot_hand)
                 self.bot_draw_count += 1
-                logger.info(f"Bot drew a card in {self.mode} Mode. Draw count: {self.bot_draw_count}")
+                logger.info(f"Bot drew a card in Easy Mode. Draw count: {self.bot_draw_count}")
             else:
-                logger.info(f"Bot decides to stop drawing in {self.mode} Mode.")
+                logger.info("Bot decides to stop drawing in Easy Mode.")
+                break
+
+
+    def bot_turn_medium(self):
+        while self.bot_draw_count < self.MAX_BOT_DRAWS:
+            if sum(self.bot_hand) < 15:
+                self.draw_card(self.bot_hand)
+                self.bot_draw_count += 1
+                logger.info(f"Bot drew a card in Medium Mode. Draw count: {self.bot_draw_count}")
+            else:
+                logger.info(f"Bot stops drawing as its total is {sum(self.bot_hand)} which is >= 15.")
+                break
+
+
+
+    def bot_turn_hard(self):
+        player_total = sum(self.player_hand)
+        player_distance = min(abs(23 - player_total), abs(-23 - player_total))
+        
+        while self.bot_draw_count < self.MAX_BOT_DRAWS and not self.game_over:
+            bot_total = sum(self.bot_hand)
+            bot_distance = min(abs(23 - bot_total), abs(-23 - bot_total))
+            
+            logger.info(f"Player's Total: {player_total} (Distance: {player_distance})")
+            logger.info(f"C-3PO's Current Total: {bot_total} (Distance: {bot_distance})")
+            
+            if bot_distance < player_distance:
+                logger.info("C-3PO has a better total than the player. Stopping draw.")
                 self.game_over = True
                 break
-        logger.info("Bot's turn ended.")
+            elif bot_distance == player_distance:
+                logger.info("C-3PO's total is equal to the player's. Continuing to draw.")
+
+            remaining_cards = self.deck
+            
+            distance_to_23 = 23 - bot_total
+            distance_to_neg23 = -23 - bot_total
+            
+            logger.info(f"Distance to 23: {distance_to_23}")
+            logger.info(f"Distance to -23: {distance_to_neg23}")
+            
+            beneficial_cards = [card for card in remaining_cards if 
+                                (distance_to_23 * card > 0) or 
+                                (distance_to_neg23 * card > 0)]
+            beneficial_probability = len(beneficial_cards) / len(remaining_cards) if remaining_cards else 0
+            
+            logger.info(f"Probability of drawing a beneficial card: {beneficial_probability:.2f}")
+
+            if beneficial_probability >= 0.5:
+                self.draw_card(self.bot_hand)
+                self.bot_draw_count += 1
+                logger.info(f"C-3PO draws a card. New total: {sum(self.bot_hand)}")
+            else:
+                logger.info("C-3PO decides not to draw based on low beneficial probability.")
+                self.game_over = True
+                break
+
+
+
+
 
     def player_draw(self):
         if not self.game_over:
