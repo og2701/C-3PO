@@ -16,7 +16,7 @@ LINE_SPACING = 10
 BG_COLOR = (255, 255, 255, 255)
 TEXT_COLOR = (0, 0, 0)
 MAX_CHAR = 2000
-FONT_PATH = Path(__file__).parent / 'resources' / 'Aurebesh.otf'
+FONT_PATH = "resources/Aurebesh.otf"
 
 try:
     FONT = ImageFont.truetype(str(FONT_PATH), size=FONT_SIZE)
