@@ -123,13 +123,22 @@ class DrawButton(discord.ui.Button):
                 embed.set_thumbnail(url="https://i.imgur.com/bc0yumE.png")
             elif winner == interaction.user.display_name:
                 embed.set_thumbnail(url="https://i.imgur.com/UNKFLb1.png")
+            else:
+                embed.set_thumbnail(url="https://i.imgur.com/tie.png")
 
-            for child in interaction.message.components[0].children:
-                child.disabled = True
+            disabled_draw = DrawButton()
+            disabled_draw.disabled = True
+
+            disabled_stand = StandButton()
+            disabled_stand.disabled = True
+
+            disabled_rules = RulesButton()
+            disabled_rules.disabled = True
 
             view = discord.ui.View()
-            for child in interaction.message.components[0].children:
-                view.add_item(child)
+            view.add_item(disabled_draw)
+            view.add_item(disabled_stand)
+            view.add_item(disabled_rules)
 
             await interaction.response.edit_message(embed=embed, view=view)
             del games[interaction.user.id]
@@ -143,10 +152,12 @@ class DrawButton(discord.ui.Button):
             embed.set_thumbnail(url="https://i.imgur.com/3Fa2eXV.png")
 
             view = discord.ui.View()
-            for child in interaction.message.components[0].children:
-                view.add_item(child)
+            view.add_item(self)
+            view.add_item(StandButton())
+            view.add_item(RulesButton())
 
             await interaction.response.edit_message(embed=embed, view=view)
+
 
 
 class StandButton(discord.ui.Button):
@@ -182,16 +193,26 @@ class StandButton(discord.ui.Button):
             embed.set_thumbnail(url="https://i.imgur.com/bc0yumE.png")
         elif winner == interaction.user.display_name:
             embed.set_thumbnail(url="https://i.imgur.com/UNKFLb1.png")
+        else:
+            embed.set_thumbnail(url="https://i.imgur.com/tie.png")
 
-        for child in interaction.message.components[0].children:
-            child.disabled = True
+        disabled_draw = DrawButton()
+        disabled_draw.disabled = True
+
+        disabled_stand = StandButton()
+        disabled_stand.disabled = True
+
+        disabled_rules = RulesButton()
+        disabled_rules.disabled = True
 
         view = discord.ui.View()
-        for child in interaction.message.components[0].children:
-            view.add_item(child)
+        view.add_item(disabled_draw)
+        view.add_item(disabled_stand)
+        view.add_item(disabled_rules)
 
         await interaction.response.edit_message(embed=embed, view=view)
         del games[interaction.user.id]
+
 
 
 class RulesButton(discord.ui.Button):
