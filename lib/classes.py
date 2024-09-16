@@ -14,10 +14,11 @@ from lib.settings import games
 from lib.sabacc_stats import Stats
 
 CPU_PLAYER_NAME = "C-3PO"
-MAX_DRAW_LIMIT = 5
 
 
 class SabaccGame:
+    MAX_DRAW_LIMIT = 5
+
     def __init__(self, player):
         self.deck = [i for i in range(-10, 11)] * 4
         shuffle(self.deck)
