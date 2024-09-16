@@ -35,8 +35,8 @@ class SabaccGame:
     def get_mode_description(self):
         descriptions = {
             'Easy': "Easy Mode: C-3PO draws cards randomly.",
-            'Medium': "Medium Mode: C-3PO uses simple heuristics to decide.",
-            'Hard': "Hard Mode: C-3PO employs optimal strategy."
+            'Medium': "Medium Mode: C-3PO draws until a decent total is reached.",
+            'Hard': "Hard Mode: C-3PO employs optimal strategy using probabilities."
         }
         return descriptions[self.mode]
 
@@ -70,10 +70,14 @@ class SabaccGame:
         logger.info("Bot's turn ended.")
 
     def bot_turn_easy(self):
-        while self.bot_draw_count < self.MAX_BOT_DRAWS and randint(0, 1) == 1 and not self.player_stands:
-            self.draw_card(self.bot_hand)
-            self.bot_draw_count += 1
-            logger.info(f"Bot drew a card in Easy Mode. Draw count: {self.bot_draw_count}")
+        while self.bot_draw_count < self.MAX_BOT_DRAWS and not self.player_stands:
+            if randint(0, 1) == 1:
+                self.draw_card(self.bot_hand)
+                self.bot_draw_count += 1
+                logger.info(f"Bot drew a card in Easy Mode. Draw count: {self.bot_draw_count}")
+            else:
+                logger.info("Bot decides to stop drawing in Easy Mode.")
+                break
 
     def bot_turn_medium(self):
         while self.bot_draw_count < self.MAX_BOT_DRAWS and sum(self.bot_hand) < 15 and not self.player_stands:
@@ -84,36 +88,36 @@ class SabaccGame:
     def bot_turn_hard(self):
         while self.bot_draw_count < self.MAX_BOT_DRAWS:
             bot_total = sum(self.bot_hand)
+            remaining_cards = self.deck
+
             logger.info(f"Bot's current total in Hard Mode: {bot_total}")
 
             if bot_total <= -20:
                 logger.info("Bot decides to stop drawing to avoid busting towards -23.")
                 break
 
-            distance_to_23 = abs(23 - bot_total)
-            distance_to_neg23 = abs(-23 - bot_total)
+            distance_to_23 = 23 - bot_total
+            distance_to_neg23 = -23 - bot_total
 
-            target = 23 if distance_to_23 <= distance_to_neg23 else -23
+            target = 23 if abs(distance_to_23) <= abs(distance_to_neg23) else -23
             logger.info(f"Bot's target in Hard Mode: {target}")
 
-            potential_moves = [bot_total + card for card in self.deck]
+            beneficial_cards = [card for card in remaining_cards if (target - bot_total) * card > 0]
+            risk_cards = [card for card in remaining_cards if (target - bot_total) * card < 0]
 
-            if not potential_moves:
-                logger.info("No potential moves left for the bot.")
+            if not beneficial_cards:
+                logger.info("No beneficial cards remaining. Bot stops drawing.")
                 break
 
-            best_move = min(potential_moves, key=lambda x: abs(target - x))
-            new_distance = abs(target - best_move)
-            current_distance = abs(target - bot_total)
+            beneficial_probability = len(beneficial_cards) / len(remaining_cards)
+            logger.info(f"Probability of drawing a beneficial card: {beneficial_probability}")
 
-            logger.info(f"Bot evaluates best move: {best_move} with new distance: {new_distance}")
-
-            if new_distance < current_distance and (-23 < best_move < 23):
+            if beneficial_probability >= 0.5 or abs(target - bot_total) > 5:
                 self.draw_card(self.bot_hand)
                 self.bot_draw_count += 1
                 logger.info(f"Bot draws a card in Hard Mode. Draw count: {self.bot_draw_count}")
             else:
-                logger.info("Bot decides to stop drawing as no better moves are available.")
+                logger.info("Bot decides to stop drawing due to low probability in Hard Mode.")
                 break
 
     def player_draw(self):
@@ -268,6 +272,6 @@ class RulesButton(discord.ui.Button):
         embed.add_field(name="Winning", value="If your total is closer to **23** or **-23** than C-3PO's, you win!", inline=False)
         embed.add_field(name="Limits", value="You can draw a maximum of **5** cards. Exceeding the total range of **-23** to **23** results in an immediate loss.", inline=False)
         embed.add_field(name="Tie", value="If both you and C-3PO are equally close to the target, the game is a tie.", inline=False)
-        embed.add_field(name="AI Behavior", value="In **Hard Mode**, C-3PO employs an optimal strategy to minimize the distance to the target.", inline=False)
+        embed.add_field(name="AI Behavior", value="In **Hard Mode**, C-3PO uses probability to maximize its chances of winning.", inline=False)
         embed.set_footer(text="Good luck!")
         await interaction.response.send_message(embed=embed, ephemeral=True)
