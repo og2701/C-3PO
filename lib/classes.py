@@ -2,11 +2,6 @@ import discord
 from random import shuffle
 from pathlib import Path
 import sys
-import logging
-
-
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('SabaccGame')
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
@@ -14,7 +9,6 @@ from lib.settings import games
 from lib.sabacc_stats import Stats
 
 CPU_PLAYER_NAME = "C-3PO"
-MAX_DRAW_LIMIT = 5
 
 
 class SabaccGame:
@@ -27,37 +21,28 @@ class SabaccGame:
         self.player_stands = False
         self.game_over = False
         self.draw_count = 0
-        self.bot_draw_count = 0 
+        self.bot_draw_count = 0
         self.stats = Stats(player.id)
 
     def draw_card(self, hand):
-        if len(hand) >= 12:
-            logger.debug('Cannot draw more cards; absolute hand size limit reached.')
-            return None
         if not self.deck:
+            # Reshuffle the deck if empty
             self.deck = [i for i in range(-10, 11)] * 4
             shuffle(self.deck)
-            logger.debug('Deck was empty. Reshuffled the deck.')
         card = self.deck.pop()
         hand.append(card)
-        logger.debug(f'Drew card: {card} | New hand: {hand}')
         return card
 
     def start_game(self):
         for _ in range(2):
             self.draw_card(self.player_hand)
             self.draw_card(self.bot_hand)
-        logger.debug(f'Game started. Player Hand: {self.player_hand} | Bot Hand: {self.bot_hand}')
 
     def hand_total(self, hand):
-        total = sum(hand)
-        logger.debug(f'Calculated hand total for {hand}: {total}')
-        return total
+        return sum(hand)
 
     def distance_from_target(self, total):
-        distance = min(abs(23 - total), abs(-23 - total))
-        logger.debug(f'Distance from target for total {total}: {distance}')
-        return distance
+        return min(abs(23 - total), abs(-23 - total))
 
     def should_draw(self, current_total):
         safe_min = -23 - current_total
@@ -66,12 +51,9 @@ class SabaccGame:
         safe_cards = [card for card in self.deck if safe_min <= card <= safe_max]
         probability_safe = len(safe_cards) / len(self.deck) if self.deck else 0
 
-        logger.debug(f'Bot should_draw assessment: Safe Cards={safe_cards}, Probability Safe={probability_safe:.2f}')
-
         return probability_safe > 0.5
 
     def bot_turn(self):
-        logger.debug('Bot turn started.')
         while not self.game_over:
             bot_total = self.hand_total(self.bot_hand)
             player_total = self.hand_total(self.player_hand)
@@ -80,59 +62,43 @@ class SabaccGame:
             player_distance = self.distance_from_target(player_total)
 
             if bot_distance > player_distance + 2:
-                if self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                    logger.debug('Bot decides to draw (significantly worse).')
+                if self.bot_draw_count < 5 and self.should_draw(bot_total):
                     self.draw_card(self.bot_hand)
                     self.bot_draw_count += 1
-                    logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
                 else:
-                    logger.debug('Bot decides to stand (significantly worse but chose not to draw).')
                     break
 
             elif bot_distance > 1:
-                if bot_total < 20 and self.bot_draw_count < self.MAX_DRAW_LIMIT and self.should_draw(bot_total):
-                    logger.debug('Bot decides to draw (slightly worse and total < 20).')
+                if bot_total < 20 and self.bot_draw_count < 5 and self.should_draw(bot_total):
                     self.draw_card(self.bot_hand)
                     self.bot_draw_count += 1
-                    logger.debug(f'Bot Draw Count: {self.bot_draw_count}')
                 else:
-                    logger.debug('Bot decides to stand (slightly worse but chooses not to draw).')
                     break
 
             else:
-                logger.debug('Bot decides to stand (close enough to target).')
                 break
 
-            bot_total_after_draw = self.hand_total(self.bot_hand)
-            if bot_total_after_draw > 23 or bot_total_after_draw < -23:
-                logger.debug('Bot busts after drawing.')
+            if self.hand_total(self.bot_hand) > 23 or self.hand_total(self.bot_hand) < -23:
                 self.game_over = True
                 break
 
-        logger.debug('Bot turn ended.')
         self.game_over = True
 
     def player_draw(self):
         if not self.game_over:
-            if self.draw_count < self.MAX_DRAW_LIMIT:
-                logger.debug('Player decides to draw a card.')
+            if self.draw_count < 5:
                 self.draw_card(self.player_hand)
                 self.draw_count += 1
-                logger.debug(f'Player Draw Count: {self.draw_count}')
                 if self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
-                    logger.debug('Player busts.')
                     self.game_over = True
             else:
-                logger.debug('Player has reached the maximum number of additional draws.')
                 self.game_over = True
 
-        if self.draw_count >= self.MAX_DRAW_LIMIT or self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
-            logger.debug('Game over due to player draw limit or bust.')
+        if self.draw_count >= 5 or self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
             self.game_over = True
 
     def player_stand(self):
         if not self.game_over:
-            logger.debug('Player stands. Bot\'s turn begins.')
             self.player_stands = True
             self.bot_turn()
 
@@ -143,19 +109,13 @@ class SabaccGame:
             player_distance = self.distance_from_target(player_total)
             bot_distance = self.distance_from_target(bot_total)
 
-            logger.debug(f'Final Totals - Player: {player_total}, Bot: {bot_total}')
-            logger.debug(f'Final Distances - Player: {player_distance}, Bot: {bot_distance}')
-
             if player_distance < bot_distance:
-                logger.debug('Player wins.')
                 self.stats.increment_wins()
                 return self.player.display_name
             elif bot_distance < player_distance:
-                logger.debug('Bot wins.')
                 self.stats.increment_losses()
                 return CPU_PLAYER_NAME
             else:
-                logger.debug('Game is a tie.')
                 self.stats.increment_ties()
                 return "It's a tie!"
         return None
