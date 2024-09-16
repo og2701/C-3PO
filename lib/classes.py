@@ -45,18 +45,53 @@ class HardStrategy(BotStrategy):
     def monte_carlo_simulation(self, game, trials=1000):
         successes = 0
         for _ in range(trials):
-            if not game.deck:
-                continue
             simulated_deck = game.deck.copy()
-            simulated_card = simulated_deck.pop(randint(0, len(simulated_deck) - 1))
-            simulated_bot_total = sum(game.bot_hand) + simulated_card
-            simulated_player_total = sum(game.player_hand)
-            
-            simulated_bot_distance = min(abs(23 - simulated_bot_total), abs(-23 - simulated_bot_total))
-            simulated_player_distance = min(abs(23 - simulated_player_total), abs(-23 - simulated_player_total))
-            
-            if simulated_bot_distance < simulated_player_distance:
+            simulated_bot_hand = game.bot_hand.copy()
+            simulated_bot_draw_count = len(simulated_bot_hand)
+            simulated_game_over = False
+
+            while simulated_bot_draw_count < game.MAX_BOT_DRAWS and not simulated_game_over:
+                bot_total = sum(simulated_bot_hand)
+                player_total = sum(game.player_hand)
+                player_distance = min(abs(23 - player_total), abs(-23 - player_total))
+                bot_distance = min(abs(23 - bot_total), abs(-23 - bot_total))
+
+                if bot_distance < player_distance:
+                    simulated_game_over = True
+                    break
+                elif bot_distance == player_distance:
+                    should_draw = True
+                else:
+                    beneficial_cards = [card for card in simulated_deck if
+                                        (23 - bot_total) * card > 0 or
+                                        (-23 - bot_total) * card > 0]
+                    beneficial_probability = len(beneficial_cards) / len(simulated_deck) if simulated_deck else 0
+
+                    should_draw = beneficial_probability > 0.55
+
+                if should_draw and simulated_deck:
+                    drawn_card = simulated_deck.pop(randint(0, len(simulated_deck) - 1))
+                    simulated_bot_hand.append(drawn_card)
+                    simulated_bot_draw_count += 1
+
+                    new_total = sum(simulated_bot_hand)
+                    if new_total > 23 or new_total < -23:
+                        simulated_game_over = True
+                        break
+                else:
+                    simulated_game_over = True
+                    break
+
+            final_bot_total = sum(simulated_bot_hand)
+            final_player_total = sum(game.player_hand)
+            if final_bot_total > 23 or final_bot_total < -23:
+                continue
+            final_bot_distance = min(abs(23 - final_bot_total), abs(-23 - final_bot_total))
+            final_player_distance = min(abs(23 - final_player_total), abs(-23 - final_player_total))
+
+            if final_bot_distance < final_player_distance:
                 successes += 1
+
         return successes / trials if trials > 0 else 0
 
     def decide_draw(self, game):
