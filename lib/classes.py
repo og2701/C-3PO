@@ -1,4 +1,31 @@
 import discord
+
+from random import shuffle
+from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from lib.settings import games
+from lib.sabacc_stats import Stats
+
+CPU_PLAYER_NAME = "C-3PO"
+
+
+import discord
+from random import shuffle
+from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from lib.settings import games
+from lib.sabacc_stats import Stats
+
+CPU_PLAYER_NAME = "C-3PO"
+
+
+import discord
 from random import shuffle
 from pathlib import Path
 import sys
@@ -21,12 +48,10 @@ class SabaccGame:
         self.player_stands = False
         self.game_over = False
         self.draw_count = 0
-        self.bot_draw_count = 0
         self.stats = Stats(player.id)
 
     def draw_card(self, hand):
         if not self.deck:
-            # Reshuffle the deck if empty
             self.deck = [i for i in range(-10, 11)] * 4
             shuffle(self.deck)
         card = self.deck.pop()
@@ -62,16 +87,14 @@ class SabaccGame:
             player_distance = self.distance_from_target(player_total)
 
             if bot_distance > player_distance + 2:
-                if self.bot_draw_count < 5 and self.should_draw(bot_total):
+                if self.should_draw(bot_total):
                     self.draw_card(self.bot_hand)
-                    self.bot_draw_count += 1
                 else:
                     break
 
             elif bot_distance > 1:
-                if bot_total < 20 and self.bot_draw_count < 5 and self.should_draw(bot_total):
+                if bot_total < 20 and self.should_draw(bot_total):
                     self.draw_card(self.bot_hand)
-                    self.bot_draw_count += 1
                 else:
                     break
 
@@ -93,7 +116,6 @@ class SabaccGame:
                     self.game_over = True
             else:
                 self.game_over = True
-
         if self.draw_count >= 5 or self.hand_total(self.player_hand) > 23 or self.hand_total(self.player_hand) < -23:
             self.game_over = True
 
