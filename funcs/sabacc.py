@@ -6,7 +6,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from lib.settings import games
-from lib.classes import SabaccGame, DrawButton, StandButton, RulesButton
+from lib.sabacc_classes import SabaccGame, DrawButton, StandButton, RulesButton
 
 async def sabacc(interaction: discord.Interaction):
     if interaction.user.id in games:
