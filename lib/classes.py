@@ -92,38 +92,33 @@ class SabaccGame:
             bot_total = sum(self.bot_hand)
             remaining_cards = self.deck
 
-            logger.info(f"Bot's current total in Hard Mode: {bot_total}")
             logger.info(f"Player's final total: {player_total}")
+            logger.info(f"C-3PO's current total in Hard Mode: {bot_total}")
 
             if (bot_total > player_total and bot_total <= 23) or (bot_total < player_total and bot_total >= -23):
-                logger.info("C-3PO stops drawing as its total already beats the player.")
-                break
-
-            if -20 <= bot_total <= 20:
-                beneficial_cards = [card for card in remaining_cards if (23 - bot_total) * card > 0 or (-23 - bot_total) * card > 0]
-                beneficial_probability = len(beneficial_cards) / len(remaining_cards) if remaining_cards else 0
-                logger.info(f"Probability of drawing a beneficial card: {beneficial_probability}")
-
-                if beneficial_probability < 0.5:
-                    logger.info("C-3PO stops drawing as its total is in a strong range and probability of improvement is low.")
+                if abs(23 - bot_total) <= 3 or abs(-23 - bot_total) <= 3:
+                    logger.info("C-3PO stops drawing as its total is close to target and beats the player.")
                     break
 
             distance_to_23 = 23 - bot_total
             distance_to_neg23 = -23 - bot_total
-            target = 23 if abs(distance_to_23) <= abs(distance_to_neg23) else -23
-            logger.info(f"Bot's target in Hard Mode: {target}")
 
-            beneficial_cards = [card for card in remaining_cards if (target - bot_total) * card > 0]
+            logger.info(f"Distance to 23: {distance_to_23}")
+            logger.info(f"Distance to -23: {distance_to_neg23}")
+
+            beneficial_cards = [card for card in remaining_cards if (23 - bot_total) * card > 0 or (-23 - bot_total) * card > 0]
             beneficial_probability = len(beneficial_cards) / len(remaining_cards) if remaining_cards else 0
+
             logger.info(f"Probability of drawing a beneficial card: {beneficial_probability}")
 
-            if beneficial_probability >= 0.5 or abs(target - bot_total) > 5:
+            if beneficial_probability >= 0.5 or abs(distance_to_23) > 3 or abs(distance_to_neg23) > 3:
                 self.draw_card(self.bot_hand)
                 self.bot_draw_count += 1
-                logger.info(f"Bot draws a card in Hard Mode. Draw count: {self.bot_draw_count}")
+                logger.info(f"C-3PO draws a card. New total: {sum(self.bot_hand)}")
             else:
-                logger.info("Bot decides to stop drawing due to low probability in Hard Mode.")
+                logger.info("C-3PO stops drawing due to low probability.")
                 break
+
 
 
 
