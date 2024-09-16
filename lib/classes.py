@@ -100,8 +100,13 @@ class SabaccGame:
                 break
 
             if -20 <= bot_total <= 20:
-                logger.info("C-3PO stops drawing as its total is strong enough.")
-                break
+                beneficial_cards = [card for card in remaining_cards if (23 - bot_total) * card > 0 or (-23 - bot_total) * card > 0]
+                beneficial_probability = len(beneficial_cards) / len(remaining_cards) if remaining_cards else 0
+                logger.info(f"Probability of drawing a beneficial card: {beneficial_probability}")
+
+                if beneficial_probability < 0.5:
+                    logger.info("C-3PO stops drawing as its total is in a strong range and probability of improvement is low.")
+                    break
 
             distance_to_23 = 23 - bot_total
             distance_to_neg23 = -23 - bot_total
@@ -112,13 +117,14 @@ class SabaccGame:
             beneficial_probability = len(beneficial_cards) / len(remaining_cards) if remaining_cards else 0
             logger.info(f"Probability of drawing a beneficial card: {beneficial_probability}")
 
-            if beneficial_probability >= 0.7 or abs(target - bot_total) > 5:
+            if beneficial_probability >= 0.5 or abs(target - bot_total) > 5:
                 self.draw_card(self.bot_hand)
                 self.bot_draw_count += 1
                 logger.info(f"Bot draws a card in Hard Mode. Draw count: {self.bot_draw_count}")
             else:
                 logger.info("Bot decides to stop drawing due to low probability in Hard Mode.")
                 break
+
 
 
     def player_draw(self):
