@@ -2,4 +2,4 @@ discord
 praw
 bs4
 pillow
-lxml
+lxml==5.2.2
