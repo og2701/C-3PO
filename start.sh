@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VENV_DIR="/home/ubuntu/C-3PO/venv"
+VENV_DIR="/home/ec2-user/C-3PO/venv"
 
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creating a virtual environment..."
